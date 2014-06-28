@@ -56,6 +56,14 @@ define([], function () {
     return this;
   };
 
+  var InitializationError = function (e) {
+    var err = Error.apply(this, arguments);
+    err.name = this.name = "TransactionError";
+    this.stack = err.stack;
+    this.message = e;
+    return this;
+  };
+
   return {
     IndexedDbNotFound: IndexedDbNotFound,
     ConnectionError: ConnectionError,
@@ -63,6 +71,7 @@ define([], function () {
     DeletionError: DeletionError,
     InvalidArgumentError: InvalidArgumentError,
     UpdateError: UpdateError,
-    TransactionError: TransactionError
+    TransactionError: TransactionError,
+    InitializationError: InitializationError
   };
 });

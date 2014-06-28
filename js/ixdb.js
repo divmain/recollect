@@ -48,8 +48,8 @@ define([
     cursor.continue();
   };
 
-  var indexField = function (storeName, fieldName, isArray) {
-    var connection = IndexedDB.open(storeName);
+  var indexField = function (dsName, fieldName, isArray) {
+    var connection = IndexedDB.open(dsName);
     connection.onsuccess(function (e) {
       var db = e.target.result;
       db.objectStore.createIndex(fieldName, fieldName, {
@@ -59,8 +59,23 @@ define([
     });
   };
 
-  var createStore = function (storeName) {
-    var connection = IndexedDB.open(storeName);
+  var _createDatastore = function (db, options) {
+    var datastore = db.createObjectStore(options.name, {
+      autoIncrement: options.autoIncrement,
+      keyPath: options.keyPath
+    });
+
+    _.each(options.indexes, function (fieldOptions, fieldName) {
+      datastore.createIndex(fieldName, fieldName, fieldOptions);
+    });
+
+    return datastore;
+  };
+
+  var createDatastore = function (options) {
+    options = options || {};
+
+    var connection = IndexedDB.open(options.databaseName);
 
     return new Promise(function (resolve, reject) {
       connection.onerror = function (e) {
@@ -68,38 +83,34 @@ define([
       };
 
       connection.onsuccess = function (e) {
-        resolve(e.target.result.value);
+        resolve(_createDatastore(e.target.result, options));
         e.target.result.close();
       };
 
-      connection.onupgradeneeded = function (e) {
-        reconfigureStore(storeName, e);
-      };
+      // connection.onupgradeneeded = function (e) {
+      //   var db = e.target.result;
+      //   // if (!db.objectStoreNames.contains(dsName)) {
+      //   db.createObjectStore(dsName, {
+      //     keyPath: "_id",
+      //     autoIncrement: true
+      //   });
+      //   // }
+      // };
     });
-
   };
 
-  var reconfigureStore = function (storeName, e) {
-    var db = e.target.result;
-    if (!db.objectStoreNames.contains(storeName)) {
-      db.createObjectStore(storeName, {
-        keyPath: "_id",
-        autoIncrement: true
-      });
-    }
-  };
 
   var get = function (options) {
     options = options || {};
-    var connection = IndexedDB.open(options.storeName);
+    var connection = IndexedDB.open(options.dbName);
 
     return new Promise(function (resolve, reject) {
       connection.onsuccess = function (e) {
         var db, transaction, store, request;
 
         db = e.target.result;
-        transaction = db.transaction([options.storeName], "readwrite");
-        store = transaction.objectStore(options.storeName);
+        transaction = db.transaction([options.dsName], "readwrite");
+        store = transaction.objectStore(options.dsName);
         request = store.get(options._id);
 
         request.onsuccess = function (e) {
@@ -123,21 +134,21 @@ define([
         reject(new Errors.ConnectionError(e));
       };
 
-      connection.onupgradeneeded = _.partial(reconfigureStore, options.storeName);
+      // connection.onupgradeneeded = _.partial(reconfigureStore, options.dsName);
     });
   };
 
   var getMany = function (options) {
     options = options || {};
-    var connection = IndexedDB.open(options.storeName);
+    var connection = IndexedDB.open(options.dbName);
 
     return new Promise(function (resolve, reject) {
       connection.onsuccess = function (e) {
         var db, transaction, store, cursor, records;
 
         db = e.target.result;
-        transaction = db.transaction([options.storeName], "readwrite");
-        store = transaction.objectStore(options.storeName);
+        transaction = db.transaction([options.dsName], "readwrite");
+        store = transaction.objectStore(options.dsName);
 
         cursor = options.indexedFieldName ?
           getIndexedCursor(store, options.indexedFieldName, options.indexedValue) :
@@ -168,21 +179,21 @@ define([
         reject(new Errors.ConnectionError(e));
       };
 
-      connection.onupgradeneeded = _.partial(reconfigureStore, options.storeName);
+      // connection.onupgradeneeded = _.partial(reconfigureStore, options.dsName);
     });
   };
 
   var addMany = function (options) {
     options = options || {};
-    var connection = IndexedDB.open(options.storeName);
+    var connection = IndexedDB.open(options.dbName);
 
     return new Promise(function (resolve, reject) {
       connection.onsuccess = function (e) {
         var db, transaction, store;
 
         db = e.target.result;
-        transaction = db.transaction([options.storeName], "readwrite");
-        store = transaction.objectStore(options.storeName);
+        transaction = db.transaction([options.dsName], "readwrite");
+        store = transaction.objectStore(options.dsName);
 
         var ids = [];
 
@@ -207,7 +218,7 @@ define([
         reject(new Errors.ConnectionError(e));
       };
 
-      connection.onupgradeneeded = _.partial(reconfigureStore, options.storeName);
+      // connection.onupgradeneeded = _.partial(reconfigureStore, options.dsName);
     });
   };
 
@@ -251,6 +262,6 @@ define([
     update: update,
     del: del,
     indexField: indexField,
-    createStore: createStore
+    createDatastore: createDatastore
   };
 });

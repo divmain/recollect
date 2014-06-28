@@ -1,4 +1,4 @@
-define(["lodash"], function (_) {
+define(["lodash", "./errors"], function (_, Errors) {
   var compare = function (operator, a, b) {
     if (operator === "$gt") { return a > b; }
     if (operator === "$lt") { return a < b; }
@@ -21,10 +21,21 @@ define(["lodash"], function (_) {
     });
   };
 
+  var normalizeOptions = function (options, requiredOptions, defaults) {
+    _.each(requiredOptions, function (requiredOption) {
+      if (!(requiredOption in options)) {
+        throw new Errors.InvalidArgumentError(requiredOption + " is a required option.");
+      }
+    });
+    return _.extend({}, defaults, options);
+  };
+
+
   // from lodash: partial, extend, each, map, pluck, isObject, isUndefined, isArray, isString
 
   return {
     compare: compare,
-    validate: validate
+    validate: validate,
+    normalizeOptions: normalizeOptions
   };
 });
