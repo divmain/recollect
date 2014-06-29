@@ -113,18 +113,22 @@ define([
     });
   };
 
+  var _createDatastore = function (db, options) {
+    if (!db.objectStoreNames.contains(options.dsName)) {
+      var datastore = db.createObjectStore(options.dsName, {
+        keyPath: options.keyPath,
+        autoIncrement: options.autoIncrement
+      });
+
+      _.each(options.indexes, function (fieldOptions, fieldName) {
+        datastore.createIndex(fieldName, fieldName, fieldOptions);
+      });
+    }
+  };
+
   var createDatastore = function (options) {
     return openDatabase(options.dbName, function (db) {
-      if (!db.objectStoreNames.contains(options.dsName)) {
-        var datastore = db.createObjectStore(options.dsName, {
-          keyPath: options.keyPath,
-          autoIncrement: options.autoIncrement
-        });
-
-        _.each(options.indexes, function (fieldOptions, fieldName) {
-          datastore.createIndex(fieldName, fieldName, fieldOptions);
-        });
-      }
+      createDatastore(db, options);
     }).then(function (db) {
       db.close();
     });
@@ -152,13 +156,11 @@ define([
 
       connection.onupgradeneeded = function (e) {
         var db = e.target.result;
-        if (!db.objectStoreNames.contains("_config")) {
-          _createDatastore(db, {
-            name: "_config",
-            autoIncrement: false,
-            keyPath: "dsName"
-          });
-        }
+        _createDatastore(db, {
+          dsName: "_config",
+          autoIncrement: false,
+          keyPath: "dsName"
+        });
       };
     });
   };
