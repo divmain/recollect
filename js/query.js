@@ -81,7 +81,10 @@ define(["lodash", "./errors"], function (_) {
       } else {
         conditions = { $eq: queryAspect };
       }
-      return [getKeypathArray(keypath), conditions];
+      return {
+        keypathArray: getKeypathArray(keypath),
+        conditions: conditions
+      };
     });
   };
 
@@ -92,11 +95,12 @@ define(["lodash", "./errors"], function (_) {
   };
 
   Query.prototype.isMatch = function (obj) {
-    return _.all(this._query, function (keypathArray, conditions) {
-      var deepValue = getDeepValue(obj, keypathArray);
-      return !_.isUndefined(deepValue) && _.all(conditions, function (referenceVal, operator) {
-        return compare(deepValue, operator, referenceVal);
-      });
+    return _.all(this._query, function (queryAspect) {
+      var deepValue = getDeepValue(obj, queryAspect.keypathArray);
+      return !_.isUndefined(deepValue) &&
+        _.all(queryAspect.conditions, function (referenceVal, operator) {
+          return compare(deepValue, operator, referenceVal);
+        });
     });
   };
 
