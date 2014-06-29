@@ -7,9 +7,7 @@ define("recollect", [
 
   var Datastore = function (options) {
     options = options || {};
-    this.dsName = options.dsName;
-    this.dbName = options.dbName;
-    this._db = options._db;
+    _.extend(this, options);
   };
 
   Datastore.prototype.find = function (query) {
@@ -60,8 +58,11 @@ define("recollect", [
     if (!_.isObject(newRecord)) {
       throw new Error.InvalidArgumentError("insertOne requires newRecord as argument");
     }
-    if (!_.isUndefined(newRecord._id)) {
-      throw new Error.InvalidArgumentError("newRecord cannot contain `_id` property");
+    if (this.autoIncrement && !_.isUndefined(newRecord[this.keyPath])) {
+      throw new Error.InvalidArgumentError("newRecord cannot contain keyPath property");
+    }
+    if (!this.autoIncrement && _.isUndefined(newRecord[this.keyPath])) {
+      throw new Error.InvalidArgumentError("newRecord must contain keyPath property");
     }
 
     return ixdb.addMany({
@@ -141,11 +142,11 @@ define("recollect", [
       throw new Errors.InitializationError("Invalid datastore name or Recollect instance " +
         "already initialized.");
     }
-    recollect[dsName] = new Datastore({
-      dbName: recollect.dbName,
-      dsName: dsName,
-      _db: recollect
-    });
+
+    recollect[dsName] = new Datastore(_.extend({}, dsRecord, {
+      _db: recollect,
+      dbName: recollect.dbName
+    }));
   };
 
   var Recollect = function (name) {
