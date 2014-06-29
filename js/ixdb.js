@@ -243,20 +243,49 @@ define([
       });
   };
 
-  var update = function (objUpdates, record) {
-    var request,
-      value = record.value;
-    _.extend(value, objUpdates);
-    request = record.update(value);
+  var _update = function (newProperties, query, e) {
+    var
+      cursor = e.target.result,
+      value = cursor.value;
+    if (!cursor) { return; }
+    if (!query || query.isMatch(cursor.value)) {
+      _.extend(value, newProperties);
+      cursor.update(value);
+    }
+    cursor.continue();
+  };
 
-    return new Promise(function (resolve, reject) {
-      request.onsuccess = function (e) {
-        resolve(e.target.result);
-      };
-      request.onerror = function (e) {
-        reject(new Errors.UpdateError(e));
-      };
-    });
+  var update = function (options) {
+    var _db,
+      query = new Query(options.query);
+
+    return openDatabase(options.dbName)
+      .then(function (db) {
+        _db = db;
+        var
+          transaction = db.transaction([options.dsName], "readwrite"),
+          store = transaction.objectStore(options.dsName),
+          cursor = getCursor(store);
+
+        cursor.onsuccess = _.partial(_update, options.newProperties, query);
+
+        return new Promise(function (resolve, reject) {
+          cursor.onerror = function (e) {
+            reject(new Errors.CursorError(e));
+          };
+
+          transaction.oncomplete = function (/* e */) {
+            resolve();
+          };
+
+          transaction.onerror = function (e) {
+            reject(new Errors.TransactionError(e));
+          };
+        });
+      })
+      .finally(function () {
+        _db.close();
+      });
   };
 
   var del = function (options) {
@@ -278,7 +307,6 @@ define([
   };
 
   return {
-    actionByKey: actionByKey,
     getMany: getMany,
     addMany: addMany,
     update: update,
