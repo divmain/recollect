@@ -168,7 +168,7 @@ define([
         db = e.target.result;
         transaction = db.transaction([options.dsName], "readwrite");
         store = transaction.objectStore(options.dsName);
-        request = store.get(options._id);
+        request = store.get(options.key);
 
         request.onsuccess = function (e) {
           options.action(e.target.result);
