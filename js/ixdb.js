@@ -61,19 +61,6 @@ define([
     });
   };
 
-  var _createDatastore = function (db, options) {
-    var datastore = db.createObjectStore(options.name, {
-      autoIncrement: options.autoIncrement,
-      keyPath: options.keyPath
-    });
-
-    _.each(options.indexes, function (fieldOptions, fieldName) {
-      datastore.createIndex(fieldName, fieldName, fieldOptions);
-    });
-
-    return datastore;
-  };
-
   var openDb = function (dbName, schemaUpdateFn, version) {
     var connection, updateRequired;
 
@@ -112,9 +99,13 @@ define([
   var createDatastore = function (options) {
     return openDb(options.dbName, function (db) {
       if (!db.objectStoreNames.contains(options.dsName)) {
-        db.createObjectStore(options.dsName, {
+        var datastore = db.createObjectStore(options.dsName, {
           keyPath: options.keyPath,
           autoIncrement: options.autoIncrement
+        });
+
+        _.each(options.indexes, function (fieldOptions, fieldName) {
+          datastore.createIndex(fieldName, fieldName, fieldOptions);
         });
       }
     }).then(function (db) {
