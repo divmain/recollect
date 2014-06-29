@@ -124,11 +124,10 @@ define("recollect", [
       dsName: this.dsName,
       dbName: this.dbName
     }).then(function () {
-      return ixdb.actionByKey({
+      return ixdb.del({
         dbName: self.dbName,
         dsName: "_config",
-        key: self.dsName,
-        action: ixdb.del
+        keys: [self.dsName],
       });
     }).then(function () {
       delete self._db[self.dsName];

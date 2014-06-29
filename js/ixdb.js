@@ -165,45 +165,6 @@ define([
     });
   };
 
-  var actionByKey = function (options) {
-    options = options || {};
-    var connection = IndexedDB.open(options.dbName);
-
-    return new Promise(function (resolve, reject) {
-      connection.onsuccess = function (e) {
-        var db, transaction, store, request;
-
-        db = e.target.result;
-        transaction = db.transaction([options.dsName], "readwrite");
-        store = transaction.objectStore(options.dsName);
-        request = store.get(options.key);
-
-        request.onsuccess = function (e) {
-          options.action(e.target.result);
-          resolve(e.target.result);
-        };
-
-        request.onerror = function (e) {
-          reject(new Errors.CursorError(e));
-        };
-
-        transaction.oncomplete = function (/* e */) {
-          db.close();
-        };
-
-        transaction.onerror = function (e) {
-          reject(new Errors.TransactionError(e));
-        };
-      };
-
-      connection.onerror = function (e) {
-        reject(new Errors.ConnectionError(e));
-      };
-
-      // connection.onupgradeneeded = _.partial(reconfigureStore, options.dsName);
-    });
-  };
-
   var getMany = function (options) {
     options = options || {};
 
