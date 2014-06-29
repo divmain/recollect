@@ -5,6 +5,8 @@ define([
   "./query"
 ], function (_, Promise, Errors, Query) {
 
+  Promise.longStackTraces();
+
   var IndexedDB, IDBKeyRange;
 
   IndexedDB = window.indexedDB ||
@@ -72,10 +74,56 @@ define([
     return datastore;
   };
 
-  var createDatastore = function (options) {
-    options = options || {};
+  var openDb = function (dbName, schemaUpdateFn, version) {
+    var connection, updateRequired;
 
-    var connection = IndexedDB.open(options.databaseName);
+    connection = version ?
+      IndexedDB.open(dbName, version) :
+      IndexedDB.open(dbName);
+
+    updateRequired = !!schemaUpdateFn;
+
+    return new Promise(function (resolve, reject) {
+      connection.onerror = function (e) {
+        reject(new Errors.ConnectionError(e.target.error));
+      };
+
+      connection.onsuccess = function (e) {
+        var
+          db = e.target.result,
+          currentVersion = db.version;
+
+        if (schemaUpdateFn && updateRequired) {
+          db.close();
+          resolve(openDb(dbName, schemaUpdateFn, currentVersion + 1));
+        }
+
+        resolve(e.target.result);
+      };
+
+      connection.onupgradeneeded = function (e) {
+        var db = e.target.result;
+        schemaUpdateFn(db);
+        updateRequired = false;
+      };
+    });
+  };
+
+  var createDatastore = function (options) {
+    return openDb(options.dbName, function (db) {
+      if (!db.objectStoreNames.contains(options.dsName)) {
+        db.createObjectStore(options.dsName, {
+          keyPath: options.keyPath,
+          autoIncrement: options.autoIncrement
+        });
+      }
+    }).then(function (db) {
+      db.close();
+    });
+  };
+
+  var createConfigIfMissing = function (dbName) {
+    var connection = IndexedDB.open(dbName);
 
     return new Promise(function (resolve, reject) {
       connection.onerror = function (e) {
@@ -83,19 +131,21 @@ define([
       };
 
       connection.onsuccess = function (e) {
-        resolve(_createDatastore(e.target.result, options));
-        e.target.result.close();
+        var db = e.target.result;
+        db.close();
+        resolve();
       };
 
-      // connection.onupgradeneeded = function (e) {
-      //   var db = e.target.result;
-      //   // if (!db.objectStoreNames.contains(dsName)) {
-      //   db.createObjectStore(dsName, {
-      //     keyPath: "_id",
-      //     autoIncrement: true
-      //   });
-      //   // }
-      // };
+      connection.onupgradeneeded = function (e) {
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains("_config")) {
+          _createDatastore(db, {
+            name: "_config",
+            autoIncrement: false,
+            keyPath: "dsName"
+          });
+        }
+      };
     });
   };
 
@@ -181,8 +231,6 @@ define([
       connection.onerror = function (e) {
         reject(new Errors.ConnectionError(e));
       };
-
-      // connection.onupgradeneeded = _.partial(reconfigureStore, options.dsName);
     });
   };
 
@@ -220,8 +268,6 @@ define([
       connection.onerror = function (e) {
         reject(new Errors.ConnectionError(e));
       };
-
-      // connection.onupgradeneeded = _.partial(reconfigureStore, options.dsName);
     });
   };
 
@@ -265,6 +311,7 @@ define([
     update: update,
     del: del,
     indexField: indexField,
-    createDatastore: createDatastore
+    createDatastore: createDatastore,
+    createConfigIfMissing: createConfigIfMissing
   };
 });
