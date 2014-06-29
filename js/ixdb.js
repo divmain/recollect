@@ -61,7 +61,7 @@ define([
     });
   };
 
-  var dropDb = function (dbName) {
+  var deleteDatabase = function (dbName) {
     var request = IndexedDB.deleteDatabase(dbName);
     return new Promise(function (resolve, reject) {
       request.onsuccess = function (e) {
@@ -78,7 +78,7 @@ define([
     });
   };
 
-  var openDb = function (dbName, schemaUpdateFn, version) {
+  var openDatabase = function (dbName, schemaUpdateFn, version) {
     var connection, updateRequired;
 
     connection = version ?
@@ -99,7 +99,7 @@ define([
 
         if (schemaUpdateFn && updateRequired) {
           db.close();
-          resolve(openDb(dbName, schemaUpdateFn, currentVersion + 1));
+          resolve(openDatabase(dbName, schemaUpdateFn, currentVersion + 1));
         }
 
         resolve(e.target.result);
@@ -114,7 +114,7 @@ define([
   };
 
   var createDatastore = function (options) {
-    return openDb(options.dbName, function (db) {
+    return openDatabase(options.dbName, function (db) {
       if (!db.objectStoreNames.contains(options.dsName)) {
         var datastore = db.createObjectStore(options.dsName, {
           keyPath: options.keyPath,
@@ -317,6 +317,6 @@ define([
     indexField: indexField,
     createDatastore: createDatastore,
     createConfigIfMissing: createConfigIfMissing,
-    dropDb: dropDb
+    deleteDatabase: deleteDatabase
   };
 });
