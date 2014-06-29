@@ -207,90 +207,86 @@ define([
   var getMany = function (options) {
     options = options || {};
 
-    var
-      connection = IndexedDB.open(options.dbName),
+    var _db,
       query = new Query(options.query);
 
-    return new Promise(function (resolve, reject) {
-      connection.onsuccess = function (e) {
-        var db, transaction, store, cursor, records;
+    return openDatabase(options.dbName)
+      .then(function (db) {
+        _db = db;
 
-        db = e.target.result;
-        transaction = db.transaction([options.dsName], "readwrite");
-        store = transaction.objectStore(options.dsName);
-
-        cursor = options.indexedFieldName ?
-          getIndexedCursor(store, options.indexedFieldName, options.indexedValue) :
-          getCursor(store);
-
-        records = [];
+        var
+          records = [],
+          transaction = db.transaction([options.dsName], "readwrite"),
+          store = transaction.objectStore(options.dsName),
+          cursor = options.indexedFieldName ?
+            getIndexedCursor(store, options.indexedFieldName, options.indexedValue) :
+            getCursor(store);
 
         cursor.onsuccess = options.findMany ?
           _.partial(accumulateResults, records, query) :
           _.partial(oneResult, records, query);
 
-        cursor.onerror = function (e) {
-          reject(new Errors.CursorError(e));
-        };
+        return new Promise(function (resolve, reject) {
+          cursor.onerror = function (e) {
+            reject(new Errors.CursorError(e));
+          };
 
-        transaction.oncomplete = function (/* e */) {
-          db.close();
-          resolve(records);
-        };
+          transaction.oncomplete = function (/* e */) {
+            resolve(records);
+          };
 
-        transaction.onerror = function (e) {
-          reject(new Errors.TransactionError(e));
-        };
-
-      };
-
-      connection.onerror = function (e) {
-        reject(new Errors.ConnectionError(e));
-      };
-    });
+          transaction.onerror = function (e) {
+            reject(new Errors.TransactionError(e));
+          };
+        });
+      })
+      .finally(function () {
+        _db.close();
+      });
   };
 
   var addMany = function (options) {
+    var _db;
     options = options || {};
-    var connection = IndexedDB.open(options.dbName);
 
-    return new Promise(function (resolve, reject) {
-      connection.onsuccess = function (e) {
-        var db, transaction, store;
-
-        db = e.target.result;
+    return openDatabase(options.dbName)
+      .then(function (db) {
+        var transaction, store;
+        _db = db;
         transaction = db.transaction([options.dsName], "readwrite");
         store = transaction.objectStore(options.dsName);
 
-        var ids = [];
+        return new Promise(function (resolve, reject) {
+          var
+            ids = [];
 
-        _.each(options.records, function (record) {
-          var request = store.add(record);
-          request.onsuccess = function (e) {
-            ids.push(e.target.result);
+          _.each(options.records, function (record) {
+            var
+              request = store.add(record);
+            request.onsuccess = function (e) {
+              ids.push(e.target.result);
+            };
+          });
+
+          transaction.oncomplete = function (/* e */) {
+            resolve(ids);
+          };
+
+          transaction.onerror = function (e) {
+            reject(new Errors.TransactionError(e));
           };
         });
-
-        transaction.oncomplete = function (/* e */) {
-          db.close();
-          resolve(ids);
-        };
-
-        transaction.onerror = function (e) {
-          reject(new Errors.TransactionError(e));
-        };
-      };
-
-      connection.onerror = function (e) {
-        reject(new Errors.ConnectionError(e));
-      };
-    });
+      })
+      .finally(function () {
+        _db.close();
+      });
   };
 
   var update = function (objUpdates, record) {
-    var value = record.value;
+    var request,
+      value = record.value;
     _.extend(value, objUpdates);
-    var request = record.update(value);
+    request = record.update(value);
 
     return new Promise(function (resolve, reject) {
       request.onsuccess = function (e) {
@@ -303,8 +299,10 @@ define([
   };
 
   var del = function (options) {
+    var _db;
     return openDatabase(options.dbName)
       .then(function (db) {
+        _db = db;
         var
           transaction = db.transaction([options.dsName], "readwrite"),
           store = transaction.objectStore(options.dsName);
@@ -312,8 +310,9 @@ define([
         _.each(options.keys, function (key) {
           store.delete(key);
         });
-
-        db.close();
+      })
+      .finally(function () {
+        _db.close();
       });
   };
 
