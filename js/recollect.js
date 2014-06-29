@@ -110,10 +110,14 @@ define("recollect", [
     }).then(_.partial(ixdb.update, recordUpdates));
   };
 
-  // Datastore.prototype.delete = function (query) {
-  //   return ixdb.getMany(this.name, query, true)
-  //     .then(ixdb.del);
-  // };
+  Datastore.prototype.delete = function (query) {
+    return ixdb.getMany({
+      dbName: this.dbName,
+      dsName: this.name,
+      query: query,
+      findMany: true
+    }).then(ixdb.del);
+  };
 
   Datastore.prototype.indexField = function (fieldName, isArray) {
     ixdb.indexField(this.name, fieldName, isArray);
