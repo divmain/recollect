@@ -35,10 +35,11 @@ define(["lodash", "./errors"], function (_) {
     var
       ref = object;
 
-    _.each(keypathArray, function (keyAtNode) {
+    for (var i = 0; i < keypathArray.length; i++) {
+      var keyAtNode = keypathArray[i];
       ref = ref[keyAtNode];
       if (_.isUndefined(ref)) { return undefined; }
-    });
+    }
 
     return ref;
   };
@@ -66,23 +67,22 @@ define(["lodash", "./errors"], function (_) {
   };
 
   var Query = function (queryLiteral) {
-    this.tests = this.assimilate(queryLiteral);
+    this.assimilate(queryLiteral);
     return this;
   };
 
   Query.prototype.assimilate = function (queryLiteral) {
-    this._query = _.chain(queryLiteral)
-      .map(function (queryAspect, keypath) {
-        var conditions;
-        if (_.isObject(queryAspect) && isComparisonObj(queryAspect)) {
-          conditions = queryAspect;
-        } else if (_.isRegExp(queryAspect)) {
-          conditions = { $regex: queryAspect };
-        } else {
-          conditions = { $eq: queryAspect };
-        }
-        return [getKeypathArray(keypath), conditions];
-      });
+    this._query = _.map(queryLiteral, function (queryAspect, keypath) {
+      var conditions;
+      if (_.isObject(queryAspect) && isComparisonObj(queryAspect)) {
+        conditions = queryAspect;
+      } else if (_.isRegExp(queryAspect)) {
+        conditions = { $regex: queryAspect };
+      } else {
+        conditions = { $eq: queryAspect };
+      }
+      return [getKeypathArray(keypath), conditions];
+    });
   };
 
   this._query = {
@@ -92,7 +92,7 @@ define(["lodash", "./errors"], function (_) {
   };
 
   Query.prototype.isMatch = function (obj) {
-    return _.all(this._query, function (conditions, keypathArray) {
+    return _.all(this._query, function (keypathArray, conditions) {
       var deepValue = getDeepValue(obj, keypathArray);
       return !_.isUndefined(deepValue) && _.all(conditions, function (referenceVal, operator) {
         return compare(deepValue, operator, referenceVal);
