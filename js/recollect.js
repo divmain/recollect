@@ -9,6 +9,7 @@ define("recollect", [
     options = options || {};
     this.dsName = options.dsName;
     this.dbName = options.dbName;
+    this._db = options._db;
   };
 
   Datastore.prototype.find = function (query) {
@@ -118,6 +119,23 @@ define("recollect", [
     ixdb.indexField(this.dsName, fieldName, isArray);
   };
 
+  Datastore.prototype.drop = function () {
+    var self = this;
+    return ixdb.deleteDatastore({
+      dsName: this.dsName,
+      dbName: this.dbName
+    }).then(function () {
+      return ixdb.actionByKey({
+        dbName: self.dbName,
+        dsName: "_config",
+        key: self.dsName,
+        action: ixdb.del
+      });
+    }).then(function () {
+      delete self._db[self.dsName];
+    });
+  };
+
   /**
    * Creates instance of Datastore, and attaches instance as property on
    * parent Recollect instance.
@@ -138,7 +156,8 @@ define("recollect", [
     }
     recollect[dsName] = new Datastore({
       dbName: recollect.dbName,
-      dsName: dsName
+      dsName: dsName,
+      _db: recollect
     });
   };
 

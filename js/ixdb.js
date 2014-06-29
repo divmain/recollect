@@ -130,6 +130,12 @@ define([
     });
   };
 
+  var deleteDatastore = function (options) {
+    return openDatabase(options.dbName, function (db) {
+      db.deleteObjectStore(options.dsName);
+    });
+  };
+
   var createConfigIfMissing = function (dbName) {
     var connection = IndexedDB.open(dbName);
 
@@ -317,6 +323,7 @@ define([
     indexField: indexField,
     createDatastore: createDatastore,
     createConfigIfMissing: createConfigIfMissing,
-    deleteDatabase: deleteDatabase
+    deleteDatabase: deleteDatabase,
+    deleteDatastore: deleteDatastore
   };
 });
