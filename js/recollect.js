@@ -126,7 +126,7 @@ define("recollect", [
    * @param  {IDXCursor} dsRecord   Cursor for record in `_config`
    */
   var initDatastoreObject = function (recollect, dsRecord) {
-    var dsName = dsRecord.key;
+    var dsName = dsRecord.dsName;
     // var dsConfig = dsRecord.value;
 
     if (dsName === "_config") {
