@@ -7,14 +7,14 @@ define("recollect", [
 
   var Datastore = function (options) {
     options = options || {};
-    this.name = options.dsName;
+    this.dsName = options.dsName;
     this.dbName = options.dbName;
   };
 
   Datastore.prototype.find = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.name,
+      dsName: this.dsName,
       query: query,
       findMany: true
     }).then(function (records) {
@@ -25,7 +25,7 @@ define("recollect", [
   Datastore.prototype.findOne = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.name,
+      dsName: this.dsName,
       query: query,
       findMany: false
     }).then(function (records) {
@@ -36,7 +36,7 @@ define("recollect", [
   Datastore.prototype.findByIndex = function (indexedFieldName, indexedValue, query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.name,
+      dsName: this.dsName,
       query: query,
       findMany: true,
       indexedFieldName: indexedFieldName,
@@ -49,7 +49,7 @@ define("recollect", [
   Datastore.prototype.findOneByIndex = function (indexedFieldName, indexedValue, query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.name,
+      dsName: this.dsName,
       query: query,
       findMany: false,
       indexedFieldName: indexedFieldName,
@@ -69,7 +69,7 @@ define("recollect", [
 
     return ixdb.addMany({
       dbName: this.dbName,
-      dsName: this.name,
+      dsName: this.dsName,
       records: [newRecord]
     }).then(function (records) {
       return records[0].value;
@@ -88,7 +88,7 @@ define("recollect", [
 
     return ixdb.addMany({
       dbName: this.dbName,
-      dsName: this.name,
+      dsName: this.dsName,
       records: newRecords
     }).then(function (records) {
       return _.map(records, function (record) { return record.value; });
@@ -105,7 +105,7 @@ define("recollect", [
 
     return ixdb.get({
       dbName: this.dbName,
-      dsName: this.name,
+      dsName: this.dsName,
       _id: recordUpdates._id
     }).then(_.partial(ixdb.update, recordUpdates));
   };
@@ -113,14 +113,14 @@ define("recollect", [
   Datastore.prototype.delete = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.name,
+      dsName: this.dsName,
       query: query,
       findMany: true
     }).then(ixdb.del);
   };
 
   Datastore.prototype.indexField = function (fieldName, isArray) {
-    ixdb.indexField(this.name, fieldName, isArray);
+    ixdb.indexField(this.dsName, fieldName, isArray);
   };
 
   /**
@@ -142,7 +142,7 @@ define("recollect", [
         "already initialized.");
     }
     recollect[dsName] = new Datastore({
-      dbName: recollect.name,
+      dbName: recollect.dbName,
       dsName: dsName
     });
   };
@@ -151,7 +151,7 @@ define("recollect", [
     if (!name) {
       throw new Errors.InvalidArgumentError("You must provide a database name.");
     }
-    this.name = name;
+    this.dbName = name;
     return this;
   };
 
@@ -178,10 +178,10 @@ define("recollect", [
   /**
    * Creates and configures new datastore.
    *
-   * @param  {String}  options.name              Name of new datastore.
+   * @param  {String}  options.dsName            Name of new datastore.
    * @param  {Boolean} options.autoIncrement     If true, keys are automatically
    *                                             generated.
-   * @param  {String}  options.keyField          Name of primary key field.
+   * @param  {String}  options.keyPath           Name of primary key path.
    * @param  {Object}  options.indexes           Object describing fields to index.
    *                     .fieldName.unique       If true, no two entries should share same
    *                                             value in fieldName.
@@ -193,21 +193,21 @@ define("recollect", [
   Recollect.prototype.createDatastore = function (options) {
     var self = this;
 
-    options = utils.normalizeOptions(options, ["name"], {
+    options = utils.normalizeOptions(options, ["dsName"], {
       autoIncrement: true,
-      keyField: "_id",
+      keyPath: "_id",
       indexes: {}
     });
 
-    return ixdb.createDatastore(_.extend({}, options, { databaseName: this.name }))
+    return ixdb.createDatastore(_.extend({}, options, { dbName: this.dbName }))
       .then(function (/* datastore */) {
         return ixdb.addMany({
-          dbName: self.name,
+          dbName: self.dbName,
           dsName: "_config",
           records: [{
-            name: options.name,
+            dsName: options.dsName,
             autoIncrement: options.autoIncrement,
-            keyField: options.keyField,
+            keyPath: options.keyPath,
             indexes: options.indexes,
             created: (new Date()).getTime(),
             lastSynced: null
@@ -215,7 +215,7 @@ define("recollect", [
         });
       })
       .then(function () {
-        initDatastoreObject(self, { key: options.name });
+        initDatastoreObject(self, { key: options.dsName });
       });
   };
 
