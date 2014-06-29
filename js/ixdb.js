@@ -2,8 +2,8 @@ define([
   "lodash",
   "bluebird",
   "./errors",
-  "./util"
-], function (_, Promise, Errors, util) {
+  "./query"
+], function (_, Promise, Errors, Query) {
 
   var IndexedDB, IDBKeyRange;
 
@@ -32,7 +32,7 @@ define([
   var accumulateResults = function (records, query, e) {
     var cursor = e.target.result;
     if (!cursor) { return; }
-    if (!query || util.validate(query, cursor)) {
+    if (!query || query.isMatch(cursor.value)) {
       records.push(cursor);
     }
     cursor.continue();
@@ -41,7 +41,7 @@ define([
   var oneResult = function (records, query, e) {
     var cursor = e.target.result;
     if (!cursor) { return; }
-    if (!query || util.validate(query, cursor)) {
+    if (!query || query.isMatch(cursor.value)) {
       records.push(cursor);
       return;
     }
@@ -140,7 +140,10 @@ define([
 
   var getMany = function (options) {
     options = options || {};
-    var connection = IndexedDB.open(options.dbName);
+
+    var
+      connection = IndexedDB.open(options.dbName),
+      query = new Query(options.query);
 
     return new Promise(function (resolve, reject) {
       connection.onsuccess = function (e) {
@@ -157,8 +160,8 @@ define([
         records = [];
 
         cursor.onsuccess = options.findMany ?
-          _.partial(accumulateResults, records, options.query) :
-          _.partial(oneResult, records, options.query);
+          _.partial(accumulateResults, records, query) :
+          _.partial(oneResult, records, query);
 
         cursor.onerror = function (e) {
           reject(new Errors.CursorError(e));
