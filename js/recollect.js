@@ -90,21 +90,21 @@ define("recollect", [
     });
   };
 
-  Datastore.prototype.update = function (recordUpdates) {
-    if (!_.isObject(recordUpdates)) {
-      throw new Error.InvalidArgumentError("update requires recordUpdates as argument");
-    }
-    if (_.isUndefined(recordUpdates.key)) {
-      throw new Error.InvalidArgumentError("update requires recordUpdates with `_id` property");
-    }
+  // Datastore.prototype.update = function (recordUpdates) {
+  //   if (!_.isObject(recordUpdates)) {
+  //     throw new Error.InvalidArgumentError("update requires recordUpdates as argument");
+  //   }
+  //   if (_.isUndefined(recordUpdates.key)) {
+  //     throw new Error.InvalidArgumentError("update requires recordUpdates with `_id` property");
+  //   }
 
-    return ixdb.actionByKey({
-      dbName: this.dbName,
-      dsName: this.dsName,
-      key: recordUpdates.key,
-      action: _.partial(ixdb.update, recordUpdates)
-    });
-  };
+  //   return ixdb.actionByKey({
+  //     dbName: this.dbName,
+  //     dsName: this.dsName,
+  //     key: recordUpdates.key,
+  //     action: _.partial(ixdb.update, recordUpdates)
+  //   });
+  // };
 
   Datastore.prototype.delete = function (key) {
     return ixdb.actionByKey({
