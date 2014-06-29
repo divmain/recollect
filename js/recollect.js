@@ -107,10 +107,6 @@ define("recollect", [
     });
   };
 
-  Datastore.prototype.indexField = function (fieldName, isArray) {
-    ixdb.indexField(this.dsName, fieldName, isArray);
-  };
-
   Datastore.prototype.drop = function () {
     var self = this;
     return ixdb.deleteDatastore({

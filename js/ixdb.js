@@ -50,17 +50,6 @@ define([
     cursor.continue();
   };
 
-  var indexField = function (dsName, fieldName, isArray) {
-    var connection = IndexedDB.open(dsName);
-    connection.onsuccess(function (e) {
-      var db = e.target.result;
-      db.objectStore.createIndex(fieldName, fieldName, {
-        unique: false,
-        multiEntry: isArray && true || false
-      });
-    });
-  };
-
   var deleteDatabase = function (dbName) {
     var request = IndexedDB.deleteDatabase(dbName);
     return new Promise(function (resolve, reject) {
@@ -311,7 +300,6 @@ define([
     addMany: addMany,
     update: update,
     del: del,
-    indexField: indexField,
     createDatastore: createDatastore,
     createConfigIfMissing: createConfigIfMissing,
     deleteDatabase: deleteDatabase,
