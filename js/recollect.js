@@ -218,6 +218,10 @@ define("recollect", [
       });
   };
 
+  Recollect.prototype.drop = function () {
+    return ixdb.dropDb(this.dbName);
+  };
+
   Recollect.prototype.Datastore = Datastore;
   Recollect.prototype.Errors = Errors;
 

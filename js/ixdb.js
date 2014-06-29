@@ -61,6 +61,23 @@ define([
     });
   };
 
+  var dropDb = function (dbName) {
+    var request = IndexedDB.deleteDatabase(dbName);
+    return new Promise(function (resolve, reject) {
+      request.onsuccess = function (e) {
+        resolve();
+      };
+
+      request.onblocked = function (e) {
+        reject(true);
+      };
+
+      request.onerror = function (e) {
+        reject();
+      };
+    });
+  };
+
   var openDb = function (dbName, schemaUpdateFn, version) {
     var connection, updateRequired;
 
@@ -139,7 +156,6 @@ define([
       };
     });
   };
-
 
   var actionByKey = function (options) {
     options = options || {};
@@ -300,6 +316,7 @@ define([
     del: del,
     indexField: indexField,
     createDatastore: createDatastore,
-    createConfigIfMissing: createConfigIfMissing
+    createConfigIfMissing: createConfigIfMissing,
+    dropDb: dropDb
   };
 });
