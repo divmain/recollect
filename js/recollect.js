@@ -164,15 +164,19 @@ define("recollect", [
    */
   Recollect.prototype.initialize = function () {
     var self = this;
-    return ixdb.getMany({
-      db: this.name,
-      datastore: "_config",
-      query: null,
-      findMany: true
-    }).then(function (datastoreRecords) {
-      _.each(datastoreRecords, _.partial(initDatastoreObject, self));
-      return self;
-    });
+
+    return ixdb.createConfigIfMissing(this.dbName)
+      .then(function () {
+        return ixdb.getMany({
+          dbName: self.dbName,
+          dsName: "_config",
+          query: null,
+          findMany: true
+        }).then(function (datastoreRecords) {
+          _.each(datastoreRecords, _.partial(initDatastoreObject, self));
+          return self;
+        });
+      });
   };
 
   /**
