@@ -128,7 +128,7 @@ define([
 
   var createDatastore = function (options) {
     return openDatabase(options.dbName, function (db) {
-      createDatastore(db, options);
+      _createDatastore(db, options);
     }).then(function (db) {
       db.close();
     });
