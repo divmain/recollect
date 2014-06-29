@@ -107,11 +107,10 @@ define("recollect", [
   // };
 
   Datastore.prototype.delete = function (key) {
-    return ixdb.actionByKey({
+    return ixdb.del({
       dbName: this.dbName,
       dsName: this.dsName,
-      key: key,
-      action: ixdb.del
+      keys: [key]
     });
   };
 
@@ -233,7 +232,7 @@ define("recollect", [
         });
       })
       .then(function () {
-        initDatastoreObject(self, { key: options.dsName });
+        initDatastoreObject(self, { dsName: options.dsName });
       });
   };
 

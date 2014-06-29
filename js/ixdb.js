@@ -302,18 +302,19 @@ define([
     });
   };
 
-  var del = function (record) {
-    var value = record.value;
-    var request = record.delete(record.value);
+  var del = function (options) {
+    return openDatabase(options.dbName)
+      .then(function (db) {
+        var
+          transaction = db.transaction([options.dsName], "readwrite"),
+          store = transaction.objectStore(options.dsName);
 
-    return new Promise(function (resolve, reject) {
-      request.onsuccess = function () {
-        resolve(value);
-      };
-      request.onerror = function (e) {
-        reject(new Errors.DeletionError(e));
-      };
-    });
+        _.each(options.keys, function (key) {
+          store.delete(key);
+        });
+      }).then(function (db) {
+        db.close();
+      });
   };
 
   return {
