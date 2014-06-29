@@ -312,7 +312,7 @@ define([
         _.each(options.keys, function (key) {
           store.delete(key);
         });
-      }).then(function (db) {
+
         db.close();
       });
   };
