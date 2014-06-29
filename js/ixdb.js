@@ -35,7 +35,7 @@ define([
     var cursor = e.target.result;
     if (!cursor) { return; }
     if (!query || query.isMatch(cursor.value)) {
-      records.push(cursor);
+      records.push(cursor.value);
     }
     cursor.continue();
   };
@@ -44,7 +44,7 @@ define([
     var cursor = e.target.result;
     if (!cursor) { return; }
     if (!query || query.isMatch(cursor.value)) {
-      records.push(cursor);
+      records.push(cursor.value);
       return;
     }
     cursor.continue();
@@ -141,7 +141,7 @@ define([
   };
 
 
-  var get = function (options) {
+  var actionByKey = function (options) {
     options = options || {};
     var connection = IndexedDB.open(options.dbName);
 
@@ -155,6 +155,7 @@ define([
         request = store.get(options._id);
 
         request.onsuccess = function (e) {
+          options.action(e.target.result);
           resolve(e.target.result);
         };
 
@@ -277,17 +278,13 @@ define([
     });
   };
 
-  var del = function (records) {
-    var values = _.map(records, function (record) {
-      return record.value;
-    });
+  var del = function (record) {
+    var value = record.value;
+    var request = record.delete(record.value);
 
     return new Promise(function (resolve, reject) {
-      var request = _.each(records, function (record) {
-        record.delete(record.value);
-      });
       request.onsuccess = function () {
-        resolve(values);
+        resolve(value);
       };
       request.onerror = function (e) {
         reject(new Errors.DeletionError(e));
@@ -296,7 +293,7 @@ define([
   };
 
   return {
-    get: get,
+    actionByKey: actionByKey,
     getMany: getMany,
     addMany: addMany,
     update: update,

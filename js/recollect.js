@@ -17,8 +17,6 @@ define("recollect", [
       dsName: this.dsName,
       query: query,
       findMany: true
-    }).then(function (records) {
-      return _.pluck(records, "value");
     });
   };
 
@@ -29,7 +27,7 @@ define("recollect", [
       query: query,
       findMany: false
     }).then(function (records) {
-      return records.length && records[0].value || undefined;
+      return records.length && records[0] || undefined;
     });
   };
 
@@ -41,8 +39,6 @@ define("recollect", [
       findMany: true,
       indexedFieldName: indexedFieldName,
       indexedValue: indexedValue
-    }).then(function (records) {
-      return _.pluck(records, "value");
     });
   };
 
@@ -55,7 +51,7 @@ define("recollect", [
       indexedFieldName: indexedFieldName,
       indexedValue: indexedValue
     }).then(function (records) {
-      return records.length && records[0].value || undefined;
+      return records.length && records[0] || undefined;
     });
   };
 
@@ -71,8 +67,8 @@ define("recollect", [
       dbName: this.dbName,
       dsName: this.dsName,
       records: [newRecord]
-    }).then(function (records) {
-      return records[0].value;
+    }).then(function (ids) {
+      return ids[0];
     });
   };
 
@@ -90,8 +86,6 @@ define("recollect", [
       dbName: this.dbName,
       dsName: this.dsName,
       records: newRecords
-    }).then(function (records) {
-      return _.map(records, function (record) { return record.value; });
     });
   };
 
@@ -99,24 +93,25 @@ define("recollect", [
     if (!_.isObject(recordUpdates)) {
       throw new Error.InvalidArgumentError("update requires recordUpdates as argument");
     }
-    if (_.isUndefined(recordUpdates._id)) {
+    if (_.isUndefined(recordUpdates.key)) {
       throw new Error.InvalidArgumentError("update requires recordUpdates with `_id` property");
     }
 
-    return ixdb.get({
+    return ixdb.actionByKey({
       dbName: this.dbName,
       dsName: this.dsName,
-      _id: recordUpdates._id
-    }).then(_.partial(ixdb.update, recordUpdates));
+      key: recordUpdates.key,
+      action: _.partial(ixdb.update, recordUpdates)
+    });
   };
 
-  Datastore.prototype.delete = function (query) {
-    return ixdb.getMany({
+  Datastore.prototype.delete = function (key) {
+    return ixdb.actionByKey({
       dbName: this.dbName,
       dsName: this.dsName,
-      query: query,
-      findMany: true
-    }).then(ixdb.del);
+      key: key,
+      action: ixdb.del
+    });
   };
 
   Datastore.prototype.indexField = function (fieldName, isArray) {
