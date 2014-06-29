@@ -2,8 +2,8 @@ define("recollect", [
   "lodash",
   "./errors",
   "./ixdb",
-  "./util"
-], function (_, Errors, ixdb, util) {
+  "./utils"
+], function (_, Errors, ixdb, utils) {
 
   var Datastore = function (options) {
     options = options || {};
@@ -193,7 +193,7 @@ define("recollect", [
   Recollect.prototype.createDatastore = function (options) {
     var self = this;
 
-    options = util.normalizeOptions(options, ["name"], {
+    options = utils.normalizeOptions(options, ["name"], {
       autoIncrement: true,
       keyField: "_id",
       indexes: {}
