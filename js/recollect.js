@@ -6,9 +6,9 @@ define("recollect", [
 ], function (_, Errors, ixdb, utils) {
 
   /**
-   * Constructor for Datastore.  Should not be instantiated directly.
+   * Constructor for ObjectStore.  Should not be instantiated directly.
    */
-  var Datastore = function (options) {
+  var ObjectStore = function (options) {
     options = options || {};
     _.extend(this, options);
   };
@@ -21,7 +21,7 @@ define("recollect", [
    * @return {Promise}       Resolves to array of matching objects on success, or
    *                         an emtry array if not matches are found.
    */
-  Datastore.prototype.find = function (query) {
+  ObjectStore.prototype.find = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
       dsName: this.dsName,
@@ -38,7 +38,7 @@ define("recollect", [
    * @return {Promise}       Resolves to the first matching object on success, or
    *                         undefined if no matches are found.
    */
-  Datastore.prototype.findOne = function (query) {
+  ObjectStore.prototype.findOne = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
       dsName: this.dsName,
@@ -60,7 +60,7 @@ define("recollect", [
    * @return {Promise}                  Resolves to array of matching objects on success, or
    *                                    an empty array if no matches are found.
    */
-  Datastore.prototype.findByIndex = function (indexedFieldName, indexedValue, query) {
+  ObjectStore.prototype.findByIndex = function (indexedFieldName, indexedValue, query) {
     return ixdb.getMany({
       dbName: this.dbName,
       dsName: this.dsName,
@@ -81,7 +81,7 @@ define("recollect", [
    *
    * @return {Promise}                  Resolves to object on success or undefined if not found.
    */
-  Datastore.prototype.findOneByIndex = function (indexedFieldName, indexedValue, query) {
+  ObjectStore.prototype.findOneByIndex = function (indexedFieldName, indexedValue, query) {
     return ixdb.getMany({
       dbName: this.dbName,
       dsName: this.dsName,
@@ -101,7 +101,7 @@ define("recollect", [
    *
    * @return {Promise}           Resolves to key of inserted object on success.
    */
-  Datastore.prototype.insertOne = function (newRecord) {
+  ObjectStore.prototype.insertOne = function (newRecord) {
     if (!_.isObject(newRecord)) {
       throw new Error.InvalidArgumentError("insertOne requires newRecord as argument");
     }
@@ -128,7 +128,7 @@ define("recollect", [
    *
    * @return {Promise}           Resolves to array of keys of inserted objects.
    */
-  Datastore.prototype.insertMany = function (newRecords) {
+  ObjectStore.prototype.insertMany = function (newRecords) {
     if (!_.isArray(newRecords)) {
       throw new Error.InvalidArgumentError("newRecords must be an array");
     }
@@ -153,7 +153,7 @@ define("recollect", [
    *
    * @return {Promise}         Resolves with no value on success.
    */
-  Datastore.prototype.update = function (options) {
+  ObjectStore.prototype.update = function (options) {
     options = utils.normalizeOptions(options, ["query", "newProperties"], {
       dbName: this.dbName,
       dsName: this.dsName
@@ -169,7 +169,7 @@ define("recollect", [
    *
    * @return {Promise}       Resolves with no value on success.
    */
-  Datastore.prototype.delete = function (key) {
+  ObjectStore.prototype.delete = function (key) {
     return ixdb.del({
       dbName: this.dbName,
       dsName: this.dsName,
@@ -182,9 +182,9 @@ define("recollect", [
    *
    * @return {Promise}  Resolves with no value on success.
    */
-  Datastore.prototype.drop = function () {
+  ObjectStore.prototype.drop = function () {
     var self = this;
-    return ixdb.deleteDatastore({
+    return ixdb.deleteObjectStore({
       dsName: this.dsName,
       dbName: this.dbName
     }).then(function () {
@@ -199,13 +199,13 @@ define("recollect", [
   };
 
   /**
-   * Creates instance of Datastore, and attaches instance as property on
+   * Creates instance of ObjectStore, and attaches instance as property on
    * parent Recollect instance.
    *
    * @param  {Object}    recollect  Parent recollect instance.
    * @param  {IDXCursor} dsRecord   Cursor for record in `_config`
    */
-  var initDatastoreObject = function (recollect, dsRecord) {
+  var initObjectStoreObject = function (recollect, dsRecord) {
     var dsName = dsRecord.dsName;
     // var dsConfig = dsRecord.value;
 
@@ -217,7 +217,7 @@ define("recollect", [
         "already initialized.");
     }
 
-    recollect[dsName] = new Datastore(_.extend({}, dsRecord, {
+    recollect[dsName] = new ObjectStore(_.extend({}, dsRecord, {
       _db: recollect,
       dbName: recollect.dbName
     }));
@@ -239,9 +239,9 @@ define("recollect", [
 
   /**
    * Iterates through database's `_config` datastore.  For each record found
-   * of name `n`, create `this.n` instance of Datastore prototype.
+   * of name `n`, create `this.n` instance of ObjectStore prototype.
    *
-   * @return {Promise}  Resolves to Recollect instance after Datastore instances
+   * @return {Promise}  Resolves to Recollect instance after ObjectStore instances
    *                    have successfully been attached.
    */
   Recollect.prototype.initialize = function () {
@@ -255,7 +255,7 @@ define("recollect", [
           query: null,
           findMany: true
         }).then(function (datastoreRecords) {
-          _.each(datastoreRecords, _.partial(initDatastoreObject, self));
+          _.each(datastoreRecords, _.partial(initObjectStoreObject, self));
           return self;
         });
       });
@@ -276,7 +276,7 @@ define("recollect", [
    *
    * @return {Promise}                             Resolves to new datastore object.
    */
-  Recollect.prototype.createDatastore = function (options) {
+  Recollect.prototype.createObjectStore = function (options) {
     var self = this;
 
     options = utils.normalizeOptions(options, ["dsName"], {
@@ -285,7 +285,7 @@ define("recollect", [
       indexes: {}
     });
 
-    return ixdb.createDatastore(_.extend({}, options, { dbName: this.dbName }))
+    return ixdb.createObjectStore(_.extend({}, options, { dbName: this.dbName }))
       .then(function (/* datastore */) {
         return ixdb.addMany({
           dbName: self.dbName,
@@ -301,7 +301,7 @@ define("recollect", [
         });
       })
       .then(function () {
-        initDatastoreObject(self, { dsName: options.dsName });
+        initObjectStoreObject(self, { dsName: options.dsName });
       });
   };
 
@@ -314,7 +314,7 @@ define("recollect", [
     return ixdb.deleteDatabase(this.dbName);
   };
 
-  Recollect.prototype.Datastore = Datastore;
+  Recollect.prototype.ObjectStore = ObjectStore;
   Recollect.prototype.Errors = Errors;
 
   return Recollect;

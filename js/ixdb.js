@@ -102,7 +102,7 @@ define([
     });
   };
 
-  var _createDatastore = function (db, options) {
+  var _createObjectStore = function (db, options) {
     if (!db.objectStoreNames.contains(options.dsName)) {
       var datastore = db.createObjectStore(options.dsName, {
         keyPath: options.keyPath,
@@ -115,15 +115,15 @@ define([
     }
   };
 
-  var createDatastore = function (options) {
+  var createObjectStore = function (options) {
     return openDatabase(options.dbName, function (db) {
-      _createDatastore(db, options);
+      _createObjectStore(db, options);
     }).then(function (db) {
       db.close();
     });
   };
 
-  var deleteDatastore = function (options) {
+  var deleteObjectStore = function (options) {
     return openDatabase(options.dbName, function (db) {
       db.deleteObjectStore(options.dsName);
     });
@@ -145,7 +145,7 @@ define([
 
       connection.onupgradeneeded = function (e) {
         var db = e.target.result;
-        _createDatastore(db, {
+        _createObjectStore(db, {
           dsName: "_config",
           autoIncrement: false,
           keyPath: "dsName"
@@ -300,9 +300,9 @@ define([
     addMany: addMany,
     update: update,
     del: del,
-    createDatastore: createDatastore,
+    createObjectStore: createObjectStore,
     createConfigIfMissing: createConfigIfMissing,
     deleteDatabase: deleteDatabase,
-    deleteDatastore: deleteDatastore
+    deleteObjectStore: deleteObjectStore
   };
 });
