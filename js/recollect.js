@@ -5,11 +5,22 @@ define("recollect", [
   "./utils"
 ], function (_, Errors, ixdb, utils) {
 
+  /**
+   * Constructor for Datastore.  Should not be instantiated directly.
+   */
   var Datastore = function (options) {
     options = options || {};
     _.extend(this, options);
   };
 
+  /**
+   * Given a query, resolves to an array of all matching objects in object store.
+   *
+   * @param  {Object} query  Query conforming to Query object literal format.
+   *
+   * @return {Promise}       Resolves to array of matching objects on success, or
+   *                         an emtry array if not matches are found.
+   */
   Datastore.prototype.find = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
@@ -19,6 +30,14 @@ define("recollect", [
     });
   };
 
+  /**
+   * Given a query, resolves to the first matching object in object store.
+   *
+   * @param  {Object} query  Query conforming to Query object literal format.
+   *
+   * @return {Promise}       Resolves to the first matching object on success, or
+   *                         undefined if no matches are found.
+   */
   Datastore.prototype.findOne = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
@@ -30,6 +49,17 @@ define("recollect", [
     });
   };
 
+  /**
+   * Given a name of an indexed field and the value for that field, performs additional
+   * filters using provided query, and resolves to an array of all matching objects.
+   *
+   * @param  {String} indexedFieldName  Name of field that has been indexed.
+   * @param           indexedValue      Value of field in object to find.
+   * @param  {Object} query             Query conforming to Query object literal format.
+   *
+   * @return {Promise}                  Resolves to array of matching objects on success, or
+   *                                    an empty array if no matches are found.
+   */
   Datastore.prototype.findByIndex = function (indexedFieldName, indexedValue, query) {
     return ixdb.getMany({
       dbName: this.dbName,
@@ -41,6 +71,16 @@ define("recollect", [
     });
   };
 
+  /**
+   * Given a name of an indexed field and the value for that field, performs additional
+   * filters using provided query, and resolves to the first matching object.
+   *
+   * @param  {String} indexedFieldName  Name of field that has been indexed.
+   * @param           indexedValue      Value of field in object to find.
+   * @param  {Object} query             Query conforming to Query object literal format.
+   *
+   * @return {Promise}                  Resolves to object on success or undefined if not found.
+   */
   Datastore.prototype.findOneByIndex = function (indexedFieldName, indexedValue, query) {
     return ixdb.getMany({
       dbName: this.dbName,
@@ -54,6 +94,13 @@ define("recollect", [
     });
   };
 
+  /**
+   * Given an object, inserts object into the object store.
+   *
+   * @param  {Object} newRecord  Object to insert.
+   *
+   * @return {Promise}           Resolves to key of inserted object on success.
+   */
   Datastore.prototype.insertOne = function (newRecord) {
     if (!_.isObject(newRecord)) {
       throw new Error.InvalidArgumentError("insertOne requires newRecord as argument");
@@ -74,6 +121,13 @@ define("recollect", [
     });
   };
 
+  /**
+   * Given an array of objects, inserts each object into the object store.
+   *
+   * @param  {Array} newRecords  Objects to insert into database store.
+   *
+   * @return {Promise}           Resolves to array of keys of inserted objects.
+   */
   Datastore.prototype.insertMany = function (newRecords) {
     if (!_.isArray(newRecords)) {
       throw new Error.InvalidArgumentError("newRecords must be an array");
@@ -91,6 +145,14 @@ define("recollect", [
     });
   };
 
+  /**
+   * Given query, finds all matching objects in object store and merges new properties into
+   * matching objects.
+   *
+   * @param  {Object} options
+   *
+   * @return {Promise}         Resolves with no value on success.
+   */
   Datastore.prototype.update = function (options) {
     options = utils.normalizeOptions(options, ["query", "newProperties"], {
       dbName: this.dbName,
@@ -100,6 +162,13 @@ define("recollect", [
     return ixdb.update(options);
   };
 
+  /**
+   * Deletes object from store by key.
+   *
+   * @param             key  Value corresponding to keyPath in object to delete.
+   *
+   * @return {Promise}       Resolves with no value on success.
+   */
   Datastore.prototype.delete = function (key) {
     return ixdb.del({
       dbName: this.dbName,
@@ -108,6 +177,11 @@ define("recollect", [
     });
   };
 
+  /**
+   * Removes object store from database.
+   *
+   * @return {Promise}  Resolves with no value on success.
+   */
   Datastore.prototype.drop = function () {
     var self = this;
     return ixdb.deleteDatastore({
@@ -149,6 +223,12 @@ define("recollect", [
     }));
   };
 
+  /**
+   * Constructor for Recollect object.  Provides an interface for interacting with
+   * IndexedDB databases and object stores.  Should be `initialize`d before use.
+   *
+   * @param {String} name  Name database (scoped to FQDN and port)
+   */
   var Recollect = function (name) {
     if (!name) {
       throw new Errors.InvalidArgumentError("You must provide a database name.");
@@ -184,17 +264,17 @@ define("recollect", [
   /**
    * Creates and configures new datastore.
    *
-   * @param  {String}  options.dsName            Name of new datastore.
-   * @param  {Boolean} options.autoIncrement     If true, keys are automatically
-   *                                             generated.
-   * @param  {String}  options.keyPath           Name of primary key path.
-   * @param  {Object}  options.indexes           Object describing fields to index.
-   *                     .fieldName.unique       If true, no two entries should share same
-   *                                             value in fieldName.
-   *                     .fieldName.multiEntry   If true, values in fieldName should be an
-   *                                             array of values to be queried independently.
+   * @param  {String}  options.dsName              Name of new datastore.
+   * @param  {Boolean} options.autoIncrement       If true, keys are automatically
+   *                                               generated.
+   * @param  {String}  options.keyPath             Name of primary key path.
+   * @param  {Object}  options.indexes             Object describing fields to index.
+   *                     .[fieldName].unique       If true, no two entries should share same
+   *                                               value in fieldName.
+   *                     .[fieldName].multiEntry   If true, values in fieldName should be an
+   *                                               array of values to be queried independently.
    *
-   * @return {Promise}                        Resolves to new datastore object.
+   * @return {Promise}                             Resolves to new datastore object.
    */
   Recollect.prototype.createDatastore = function (options) {
     var self = this;
@@ -225,13 +305,17 @@ define("recollect", [
       });
   };
 
+  /**
+   * Drops database from IndexedDB.
+   *
+   * @return {Promise}    Resolves with no value on success.
+   */
   Recollect.prototype.drop = function () {
     return ixdb.deleteDatabase(this.dbName);
   };
 
   Recollect.prototype.Datastore = Datastore;
   Recollect.prototype.Errors = Errors;
-
 
   return Recollect;
 });
