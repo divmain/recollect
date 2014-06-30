@@ -88,12 +88,6 @@ define(["lodash", "./errors"], function (_) {
     });
   };
 
-  this._query = {
-    age: { $lt: 200, $gt: 50 },
-    "stuff.otherstuff": 2014, // { $eq: 2014 }
-    "employer": /.*lds$/      // { $regex: /.*lds$/ }
-  };
-
   Query.prototype.isMatch = function (obj) {
     return _.all(this._query, function (queryAspect) {
       var deepValue = getDeepValue(obj, queryAspect.keypathArray);
