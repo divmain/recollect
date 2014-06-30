@@ -53,15 +53,15 @@ define([
   var deleteDatabase = function (dbName) {
     var request = IndexedDB.deleteDatabase(dbName);
     return new Promise(function (resolve, reject) {
-      request.onsuccess = function (e) {
+      request.onsuccess = function (/* e */) {
         resolve();
       };
 
-      request.onblocked = function (e) {
+      request.onblocked = function (/* e */) {
         reject(true);
       };
 
-      request.onerror = function (e) {
+      request.onerror = function (/* e */) {
         reject();
       };
     });
