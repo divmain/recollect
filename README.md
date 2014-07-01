@@ -6,7 +6,7 @@ The following would work if you were to enter each line manually.  The library i
 ```javascript
 var r = new Recollect("landOfOz");
 r.initialize();
-r.createObjectStore({ osName: "characters"});
+r.createObjectStore({ osName: "characters" });
 r.characters.insertOne({ name: "Dorothy", ownsPets: true, age: 17 })
   .then(function (id) {
     console.log("Dorothy's ID is" + id);
