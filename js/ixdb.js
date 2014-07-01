@@ -168,7 +168,7 @@ define([
 
         var
           records = [],
-          transaction = db.transaction([options.dsName], "readwrite"),
+          transaction = db.transaction([options.dsName], "readonly"),
           store = transaction.objectStore(options.dsName),
           cursor = options.indexedFieldName ?
             getIndexedCursor(store, options.indexedFieldName, options.indexedValue) :
