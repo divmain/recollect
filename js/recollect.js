@@ -24,7 +24,7 @@ define("recollect", [
   ObjectStore.prototype.find = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.dsName,
+      osName: this.osName,
       query: query,
       findMany: true
     });
@@ -41,7 +41,7 @@ define("recollect", [
   ObjectStore.prototype.findOne = function (query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.dsName,
+      osName: this.osName,
       query: query,
       findMany: false
     }).then(function (records) {
@@ -63,7 +63,7 @@ define("recollect", [
   ObjectStore.prototype.findByIndex = function (indexedFieldName, indexedValue, query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.dsName,
+      osName: this.osName,
       query: query,
       findMany: true,
       indexedFieldName: indexedFieldName,
@@ -84,7 +84,7 @@ define("recollect", [
   ObjectStore.prototype.findOneByIndex = function (indexedFieldName, indexedValue, query) {
     return ixdb.getMany({
       dbName: this.dbName,
-      dsName: this.dsName,
+      osName: this.osName,
       query: query,
       findMany: false,
       indexedFieldName: indexedFieldName,
@@ -114,7 +114,7 @@ define("recollect", [
 
     return ixdb.addMany({
       dbName: this.dbName,
-      dsName: this.dsName,
+      osName: this.osName,
       records: [newRecord]
     }).then(function (ids) {
       return ids[0];
@@ -140,7 +140,7 @@ define("recollect", [
 
     return ixdb.addMany({
       dbName: this.dbName,
-      dsName: this.dsName,
+      osName: this.osName,
       records: newRecords
     });
   };
@@ -156,7 +156,7 @@ define("recollect", [
   ObjectStore.prototype.update = function (options) {
     options = utils.normalizeOptions(options, ["query", "newProperties"], {
       dbName: this.dbName,
-      dsName: this.dsName
+      osName: this.osName
     });
 
     return ixdb.update(options);
@@ -172,7 +172,7 @@ define("recollect", [
   ObjectStore.prototype.delete = function (key) {
     return ixdb.del({
       dbName: this.dbName,
-      dsName: this.dsName,
+      osName: this.osName,
       keys: [key]
     });
   };
@@ -185,16 +185,16 @@ define("recollect", [
   ObjectStore.prototype.drop = function () {
     var self = this;
     return ixdb.deleteObjectStore({
-      dsName: this.dsName,
+      osName: this.osName,
       dbName: this.dbName
     }).then(function () {
       return ixdb.del({
         dbName: self.dbName,
-        dsName: "_config",
-        keys: [self.dsName],
+        osName: "_config",
+        keys: [self.osName],
       });
     }).then(function () {
-      delete self._db[self.dsName];
+      delete self._db[self.osName];
     });
   };
 
@@ -206,18 +206,18 @@ define("recollect", [
    * @param  {IDXCursor} dsRecord   Cursor for record in `_config`
    */
   var initObjectStoreObject = function (recollect, dsRecord) {
-    var dsName = dsRecord.dsName;
+    var osName = dsRecord.osName;
     // var dsConfig = dsRecord.value;
 
-    if (dsName === "_config") {
+    if (osName === "_config") {
       return;
     }
-    if (!_.isUndefined(recollect[dsName])) {
+    if (!_.isUndefined(recollect[osName])) {
       throw new Errors.InitializationError("Invalid datastore name or Recollect instance " +
         "already initialized.");
     }
 
-    recollect[dsName] = new ObjectStore(_.extend({}, dsRecord, {
+    recollect[osName] = new ObjectStore(_.extend({}, dsRecord, {
       _db: recollect,
       dbName: recollect.dbName
     }));
@@ -251,7 +251,7 @@ define("recollect", [
       .then(function () {
         return ixdb.getMany({
           dbName: self.dbName,
-          dsName: "_config",
+          osName: "_config",
           query: null,
           findMany: true
         }).then(function (datastoreRecords) {
@@ -264,7 +264,7 @@ define("recollect", [
   /**
    * Creates and configures new datastore.
    *
-   * @param  {String}  options.dsName              Name of new datastore.
+   * @param  {String}  options.osName              Name of new datastore.
    * @param  {Boolean} options.autoIncrement       If true, keys are automatically
    *                                               generated.
    * @param  {String}  options.keyPath             Name of primary key path.
@@ -279,7 +279,7 @@ define("recollect", [
   Recollect.prototype.createObjectStore = function (options) {
     var self = this;
 
-    options = utils.normalizeOptions(options, ["dsName"], {
+    options = utils.normalizeOptions(options, ["osName"], {
       autoIncrement: true,
       keyPath: "_id",
       indexes: {}
@@ -289,9 +289,9 @@ define("recollect", [
       .then(function (/* datastore */) {
         return ixdb.addMany({
           dbName: self.dbName,
-          dsName: "_config",
+          osName: "_config",
           records: [{
-            dsName: options.dsName,
+            osName: options.osName,
             autoIncrement: options.autoIncrement,
             keyPath: options.keyPath,
             indexes: options.indexes,
@@ -301,7 +301,7 @@ define("recollect", [
         });
       })
       .then(function () {
-        initObjectStoreObject(self, { dsName: options.dsName });
+        initObjectStoreObject(self, { osName: options.osName });
       });
   };
 

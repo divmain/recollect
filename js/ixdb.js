@@ -103,8 +103,8 @@ define([
   };
 
   var _createObjectStore = function (db, options) {
-    if (!db.objectStoreNames.contains(options.dsName)) {
-      var datastore = db.createObjectStore(options.dsName, {
+    if (!db.objectStoreNames.contains(options.osName)) {
+      var datastore = db.createObjectStore(options.osName, {
         keyPath: options.keyPath,
         autoIncrement: options.autoIncrement
       });
@@ -125,7 +125,7 @@ define([
 
   var deleteObjectStore = function (options) {
     return openDatabase(options.dbName, function (db) {
-      db.deleteObjectStore(options.dsName);
+      db.deleteObjectStore(options.osName);
     }).finally(function (db) {
       db.close();
     });
@@ -148,9 +148,9 @@ define([
       connection.onupgradeneeded = function (e) {
         var db = e.target.result;
         _createObjectStore(db, {
-          dsName: "_config",
+          osName: "_config",
           autoIncrement: false,
-          keyPath: "dsName"
+          keyPath: "osName"
         });
       };
     });
@@ -168,8 +168,8 @@ define([
 
         var
           records = [],
-          transaction = db.transaction([options.dsName], "readonly"),
-          store = transaction.objectStore(options.dsName),
+          transaction = db.transaction([options.osName], "readonly"),
+          store = transaction.objectStore(options.osName),
           cursor = options.indexedFieldName ?
             getIndexedCursor(store, options.indexedFieldName, options.indexedValue) :
             getCursor(store);
@@ -205,8 +205,8 @@ define([
       .then(function (db) {
         var transaction, store;
         _db = db;
-        transaction = db.transaction([options.dsName], "readwrite");
-        store = transaction.objectStore(options.dsName);
+        transaction = db.transaction([options.osName], "readwrite");
+        store = transaction.objectStore(options.osName);
 
         return new Promise(function (resolve, reject) {
           var
@@ -254,8 +254,8 @@ define([
       .then(function (db) {
         _db = db;
         var
-          transaction = db.transaction([options.dsName], "readwrite"),
-          store = transaction.objectStore(options.dsName),
+          transaction = db.transaction([options.osName], "readwrite"),
+          store = transaction.objectStore(options.osName),
           cursor = getCursor(store);
 
         cursor.onsuccess = _.partial(_update, options.newProperties, query);
@@ -285,8 +285,8 @@ define([
       .then(function (db) {
         _db = db;
         var
-          transaction = db.transaction([options.dsName], "readwrite"),
-          store = transaction.objectStore(options.dsName);
+          transaction = db.transaction([options.osName], "readwrite"),
+          store = transaction.objectStore(options.osName);
 
         _.each(options.keys, function (key) {
           store.delete(key);
