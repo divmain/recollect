@@ -118,7 +118,7 @@ define([
   var createObjectStore = function (options) {
     return openDatabase(options.dbName, function (db) {
       _createObjectStore(db, options);
-    }).then(function (db) {
+    }).finally(function (db) {
       db.close();
     });
   };
@@ -126,6 +126,8 @@ define([
   var deleteObjectStore = function (options) {
     return openDatabase(options.dbName, function (db) {
       db.deleteObjectStore(options.dsName);
+    }).finally(function (db) {
+      db.close();
     });
   };
 
