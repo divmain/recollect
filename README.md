@@ -1,7 +1,7 @@
 recollect
 =========
 
-example usage:
+The following would work if you were to enter each line manually.  The library is async, so if this were "real code", the subsequent method calls should be wrapped in `.then` methods.
 
 ```javascript
 var r = new Recollect("landOfOz");
