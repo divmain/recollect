@@ -2,9 +2,18 @@ define(["lodash", "./errors"], function (_) {
   var
     splitOn = /\./;
 
+  var isEqlRegex = function (objA, objB) {
+    return _.isRegExp(objA) &&
+      _.isRegExp(objB) &&
+      objA.source === objB.source &&
+      objA.global === objB.global &&
+      objA.ignoreCase === objB.ignoreCase &&
+      objA.multiline === objB.multiline;
+  };
+
   var operators = {
     $eq: function (deepValue, referenceValue) {
-      return deepValue === referenceValue;
+      return isEqlRegex(deepValue, referenceValue) || deepValue === referenceValue;
     },
     $gt: function (deepValue, referenceValue) {
       return deepValue > referenceValue;

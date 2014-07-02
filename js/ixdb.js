@@ -86,7 +86,7 @@ define([
           db = e.target.result,
           currentVersion = db.version;
 
-        if (schemaUpdateFn && updateRequired) {
+        if (updateRequired) {
           db.close();
           resolve(openDatabase(dbName, schemaUpdateFn, currentVersion + 1));
         }
