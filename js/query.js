@@ -1,7 +1,35 @@
 define(["lodash", "./errors"], function (_) {
   var
-    splitOn = /\./,
-    operators = ["$eq", "$gt", "$lt", "$gte", "$lte", "$neq", "$regex", "$contains"];
+    splitOn = /\./;
+
+  var operators = {
+    $eq: function (deepValue, referenceValue) {
+      return deepValue === referenceValue;
+    },
+    $gt: function (deepValue, referenceValue) {
+      return deepValue > referenceValue;
+    },
+    $lt: function (deepValue, referenceValue) {
+      return deepValue < referenceValue;
+    },
+    $gte: function (deepValue, referenceValue) {
+      return deepValue >= referenceValue;
+    },
+    $lte: function (deepValue, referenceValue) {
+      return deepValue <= referenceValue;
+    },
+    $neq: function (deepValue, referenceValue) {
+      return deepValue !== referenceValue;
+    },
+    $contains: function (deepValue, referenceValue) {
+      return _.isString(deepValue) &&
+        _.isString(referenceValue) &&
+        deepValue.indexOf(referenceValue) > 0;
+    },
+    $regex: function (deepValue, referenceValue) {
+      return referenceValue.test(deepValue);
+    }
+  };
 
   /**
    * Splits keypath on non-escaped period.
@@ -44,25 +72,9 @@ define(["lodash", "./errors"], function (_) {
     return ref;
   };
 
-  var compare = function (deepValue, operator, referenceVal) {
-    if (operator === "$eq") { return deepValue === referenceVal; }
-    if (operator === "$gt") { return deepValue > referenceVal; }
-    if (operator === "$lt") { return deepValue < referenceVal; }
-    if (operator === "$gte") { return deepValue >= referenceVal; }
-    if (operator === "$lte") { return deepValue <= referenceVal; }
-    if (operator === "$neq") { return deepValue !== referenceVal; }
-    if (operator === "$regex") { return referenceVal.test(deepValue); }
-    if (operator === "$contains") {
-      return _.isString(deepValue) &&
-        _.isString(referenceVal) &&
-        deepValue.indexOf(referenceVal) > 0;
-    }
-    return false;
-  };
-
   var isComparisonObj = function (comparisonObj) {
-    return _.all(comparisonObj, function (val, prop) {
-      return _.contains(operators, prop);
+    return _.all(comparisonObj, function (referenceValue, operator) {
+      return operator in operators;
     });
   };
 
@@ -73,7 +85,7 @@ define(["lodash", "./errors"], function (_) {
 
   Query.prototype.assimilate = function (queryLiteral) {
     this._query = _.map(queryLiteral, function (queryAspect, keypath) {
-      var conditions;
+      var conditions = null;
       if (_.isObject(queryAspect) && isComparisonObj(queryAspect)) {
         conditions = queryAspect;
       } else if (_.isRegExp(queryAspect)) {
@@ -91,9 +103,9 @@ define(["lodash", "./errors"], function (_) {
   Query.prototype.isMatch = function (obj) {
     return _.all(this._query, function (queryAspect) {
       var deepValue = getDeepValue(obj, queryAspect.keypathArray);
-      return !_.isUndefined(deepValue) &&
-        _.all(queryAspect.conditions, function (referenceVal, operator) {
-          return compare(deepValue, operator, referenceVal);
+      return !_.isUndefined(deepValue) && queryAspect.conditions &&
+        _.all(queryAspect.conditions, function (referenceValue, operator) {
+          return operators[operator](deepValue, referenceValue);
         });
     });
   };
