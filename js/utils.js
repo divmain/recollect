@@ -31,6 +31,7 @@ define([
   };
 
   return {
-    normalizeOptions: normalizeOptions
+    normalizeOptions: normalizeOptions,
+    inherit: inherit
   };
 });
