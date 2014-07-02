@@ -26,8 +26,8 @@ define(["lodash", "./errors"], function (_) {
         _.isString(referenceValue) &&
         deepValue.indexOf(referenceValue) > 0;
     },
-    $regex: function (deepValue, testRegex) {
-      return testRegex.test(deepValue);
+    $regex: function (deepValue, regex) {
+      return regex.test(deepValue);
     },
     $fn: function (deepValue, testFn) {
       return testFn(deepValue);
