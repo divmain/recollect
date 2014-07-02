@@ -1,6 +1,6 @@
 # Recollect
 
-Recollect is an abstraction layer over [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), providing a rich interface to interact with and query client-side databases.  It's aim is to provide a similar experience in the browser as you get on the server with MongoDB.
+Recollect is an abstraction layer over [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), providing a rich interface to interact with and query client-side databases.  It is indended to bring a MongoDB-like experience to the browser.
 
 Recollect natively supports all major browsers (IE>10) with the exception of Safari.  Safari support can be attained with the use of a [polyfill](http://nparashuram.com/IndexedDBShim/).  It is asynchronous and non-blocking, and most methods return ES6-compatible promises that resolve to the expected data.
 
@@ -238,7 +238,10 @@ recollect.sportsTeams.insertMany([{
 
 #### `.update(options)` -> `Promise`
 
-Given a `query` option, finds all matching objects and overwrites any properties in each of those objects with the provided `newProperties`.  Both `query` and `newProperties` are required options.
+Given a query, finds all matching objects and overwrites any properties in each of those objects with the provided new properties.  Options:
+
+- `query` - a Recollect [query](#query).
+- `newProperties` - properties to merge into objects matched by `query`.
 
 The returned promise resolves to `undefined`.
 
