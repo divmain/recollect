@@ -18,6 +18,7 @@ define(["./utils"], function (utils) {
   };
 
   return {
+    ObjectNotFoundError: errorFactory("ObjectNotFoundError"),
     IndexedDbNotFound: errorFactory("IndexedDbNotFound"),
     ConnectionError: errorFactory("ConnectionError"),
     CursorError: errorFactory("CursorError"),

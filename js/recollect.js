@@ -163,13 +163,33 @@ define("recollect", [
   };
 
   /**
+   * Given a key path to an existing object in the object store, replaces
+   * that object with the provided newObject.
+   *
+   * @param  {String} keyPath    Key path of object to be overwritten.
+   * @param  {Object} newObject  Object to be stored.
+   *
+   * @return {Promise}           Resolves with no value on success.  Rejects
+   *                             with ObjectNotFoundError if key does not
+   *                             match existing object.
+   */
+  ObjectStore.prototype.replace = function (keyPath, newObject) {
+    return ixdb.replace({
+      dbName: this.dbName,
+      osName: this.osName,
+      keyPath: keyPath,
+      newObject: newObject
+    });
+  };
+
+  /**
    * Deletes object from store by key.
    *
-   * @param             key  Value corresponding to keyPath in object to delete.
+   * @param  {String} keyPath  Value corresponding to keyPath in object to delete.
    *
-   * @return {Promise}       Resolves with no value on success.
+   * @return {Promise}         Resolves with no value on success.
    */
-  ObjectStore.prototype.delete = function (key) {
+  ObjectStore.prototype.delete = function (keyPath) {
     return ixdb.del({
       dbName: this.dbName,
       osName: this.osName,
@@ -207,13 +227,12 @@ define("recollect", [
    */
   var initObjectStoreObject = function (recollect, dsRecord) {
     var osName = dsRecord.osName;
-    // var dsConfig = dsRecord.value;
 
     if (osName === "_config") {
       return;
     }
     if (!_.isUndefined(recollect[osName])) {
-      throw new Errors.InitializationError("Invalid datastore name or Recollect instance " +
+      throw new Errors.InitializationError("Invalid object store name or Recollect instance " +
         "already initialized.");
     }
 
@@ -238,7 +257,7 @@ define("recollect", [
   };
 
   /**
-   * Iterates through database's `_config` datastore.  For each record found
+   * Iterates through database's `_config` object store.  For each record found
    * of name `n`, create `this.n` instance of ObjectStore prototype.
    *
    * @return {Promise}  Resolves to Recollect instance after ObjectStore instances
@@ -254,17 +273,17 @@ define("recollect", [
           osName: "_config",
           query: null,
           findMany: true
-        }).then(function (datastoreRecords) {
-          _.each(datastoreRecords, _.partial(initObjectStoreObject, self));
+        }).then(function (objectStoreRecords) {
+          _.each(objectStoreRecords, _.partial(initObjectStoreObject, self));
           return self;
         });
       });
   };
 
   /**
-   * Creates and configures new datastore.
+   * Creates and configures new object store.
    *
-   * @param  {String}  options.osName              Name of new datastore.
+   * @param  {String}  options.osName              Name of new object store.
    * @param  {Boolean} options.autoIncrement       If true, keys are automatically
    *                                               generated.
    * @param  {String}  options.keyPath             Name of primary key path.
@@ -274,7 +293,7 @@ define("recollect", [
    *                     .[fieldName].multiEntry   If true, values in fieldName should be an
    *                                               array of values to be queried independently.
    *
-   * @return {Promise}                             Resolves to new datastore object.
+   * @return {Promise}                             Resolves to new object store object.
    */
   Recollect.prototype.createObjectStore = function (options) {
     var self = this;
@@ -286,7 +305,7 @@ define("recollect", [
     });
 
     return ixdb.createObjectStore(_.extend({}, options, { dbName: this.dbName }))
-      .then(function (/* datastore */) {
+      .then(function (/* object store */) {
         return ixdb.addMany({
           dbName: self.dbName,
           osName: "_config",

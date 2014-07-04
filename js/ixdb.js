@@ -31,6 +31,11 @@ define([
     return store.index(indexedField).openCursor(keyRange);
   };
 
+  var getCursorForKeyPath = function (store, key) {
+    var keyRange = IDBKeyRange.only(key);
+    return store.openCursor(keyRange);
+  };
+
   var accumulateResults = function (records, query, e) {
     var cursor = e.target.result;
     if (!cursor) { return; }
@@ -279,6 +284,48 @@ define([
       });
   };
 
+  var replace = function (options) {
+    var _db;
+    
+    return openDatabase(options.dbName)
+      .then(function (db) {
+        _db = db;
+        var
+          transaction = db.transaction([options.osName], "readwrite"),
+          store = transaction.objectStore(options.osName),
+          cursor = getCursorForKeyPath(store, options.keyPath),
+          success = false;
+
+        return new Promise(function (resolve, reject) {
+          cursor.onsuccess = function (e) {
+            var cursor = e.target.result;
+            if (!cursor) { return; }
+            cursor.update(options.newObject);
+            success = true;
+            cursor.continue();
+          };
+
+          cursor.onerror = function (e) {
+            reject(new Errors.CursorError(e));
+          };
+
+          transaction.oncomplete = function (/* e */) {
+            if (success) {
+              resolve();
+            }
+            reject(new Errors.ObjectNotFoundError());
+          };
+
+          transaction.onerror = function (e) {
+            reject(new Errors.TransactionError(e));
+          };
+        });
+      })
+      .finally(function () {
+        _db.close();
+      });
+  };
+
   var del = function (options) {
     var _db;
     return openDatabase(options.dbName)
@@ -301,6 +348,7 @@ define([
     getMany: getMany,
     addMany: addMany,
     update: update,
+    replace: replace,
     del: del,
     createObjectStore: createObjectStore,
     createConfigIfMissing: createConfigIfMissing,
