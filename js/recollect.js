@@ -22,7 +22,7 @@ define("recollect", [
    *                         an emtry array if not matches are found.
    */
   ObjectStore.prototype.find = function (query) {
-    return ixdb.getMany({
+    return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
       query: query,
@@ -39,7 +39,7 @@ define("recollect", [
    *                         undefined if no matches are found.
    */
   ObjectStore.prototype.findOne = function (query) {
-    return ixdb.getMany({
+    return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
       query: query,
@@ -61,7 +61,7 @@ define("recollect", [
    *                                    an empty array if no matches are found.
    */
   ObjectStore.prototype.findByIndex = function (indexedFieldName, indexedValue, query) {
-    return ixdb.getMany({
+    return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
       query: query,
@@ -82,7 +82,7 @@ define("recollect", [
    * @return {Promise}                  Resolves to object on success or undefined if not found.
    */
   ObjectStore.prototype.findOneByIndex = function (indexedFieldName, indexedValue, query) {
-    return ixdb.getMany({
+    return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
       query: query,
@@ -268,7 +268,7 @@ define("recollect", [
 
     return ixdb.createConfigIfMissing(this.dbName)
       .then(function () {
-        return ixdb.getMany({
+        return ixdb.get({
           dbName: self.dbName,
           osName: "_config",
           query: null,

@@ -161,7 +161,7 @@ define([
     });
   };
 
-  var getMany = function (options) {
+  var get = function (options) {
     options = options || {};
 
     var _db,
@@ -345,7 +345,7 @@ define([
   };
 
   return {
-    getMany: getMany,
+    get: get,
     addMany: addMany,
     update: update,
     replace: replace,
