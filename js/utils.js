@@ -20,7 +20,7 @@ define([
       this.constructor$ = Parent;
       for (var prop in Parent.prototype) {
         if (hasOwn.call(Parent.prototype, prop) && prop.slice(-1) !== "$") {
-          this[prop + "$"] = Parent.prototype[prop]
+          this[prop + "$"] = Parent.prototype[prop];
         }
       }
     };
