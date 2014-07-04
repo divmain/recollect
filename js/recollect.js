@@ -193,7 +193,7 @@ define("recollect", [
     return ixdb.del({
       dbName: this.dbName,
       osName: this.osName,
-      keys: [key]
+      keys: [keyPath]
     });
   };
 
