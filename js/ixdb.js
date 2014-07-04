@@ -202,7 +202,7 @@ define([
       });
   };
 
-  var addMany = function (options) {
+  var add = function (options) {
     var _db;
     options = options || {};
 
@@ -346,7 +346,7 @@ define([
 
   return {
     get: get,
-    addMany: addMany,
+    add: add,
     update: update,
     replace: replace,
     del: del,

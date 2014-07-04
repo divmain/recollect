@@ -112,7 +112,7 @@ define("recollect", [
       throw new Error.InvalidArgumentError("newRecord must contain keyPath property");
     }
 
-    return ixdb.addMany({
+    return ixdb.add({
       dbName: this.dbName,
       osName: this.osName,
       records: [newRecord]
@@ -138,7 +138,7 @@ define("recollect", [
       }
     });
 
-    return ixdb.addMany({
+    return ixdb.add({
       dbName: this.dbName,
       osName: this.osName,
       records: newRecords
@@ -306,7 +306,7 @@ define("recollect", [
 
     return ixdb.createObjectStore(_.extend({}, options, { dbName: this.dbName }))
       .then(function (/* object store */) {
-        return ixdb.addMany({
+        return ixdb.add({
           dbName: self.dbName,
           osName: "_config",
           records: [{
