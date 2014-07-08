@@ -68,7 +68,7 @@ landOfOz.initialize();
 
 landOfOz.characters.findOne({ ownsPets: true, age: { $gt: 15, $lt: 20 } })
   .then(function (result) {
-    console.log("ID: " + result.id);
+    console.log("ID: " + result._id);
     console.log("Object:", result);
   });
 
