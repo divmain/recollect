@@ -149,7 +149,7 @@ recollect.animals.findOne({
 
 #### `.findByIndex(fieldName, value, query)` -> `Promise`
 
-Takes the name of an indexed field, an expected value for that field, and an optional [query]($query) representing additional constraints, and finds all matching objects.  This method is faster than `.find`, as the possible results are first filtered by the indexed field/value before applying the provided query.
+Takes the name of an indexed field, an expected value for that field, and an optional [query](#queries) representing additional constraints, and finds all matching objects.  This method is faster than `.find`, as the possible results are first filtered by the indexed field/value before applying the provided query.
 
 The returned promise resolves to an array of matching objects in the object store.  If no matches are found, it resolves to an empty array.
 
@@ -262,29 +262,290 @@ The returned promise resolves to `undefined`.
 
 ### Queries
 
+Query-literals are fundamental to extracting data from your databases.  They're used by several methods, including the [find](#findquery---promise)-class methods and [update](#updateoptions---promise).
+
+A query-literal is an object constructed of key-paths and a set of conditions related to the desired data at that key-path.  They look like the following:
+
+```javascript
+{
+  "thing": "something",
+  "key.val": { $lte: 5.5 }
+}
+```
+
+Key-paths are period-delimited, meaning that you can query against deep values of objects in your database.  The query above translates to the following english phrase:
+
+> Find an object that has a property `thing` whose value equals `"something"`.  This object should also have a property `key`, whose value is an object with property `val`.  The value of `val` should be less than or equal to `5.5`
+
+It would match the following object, among others:
+
+```javascript
+{
+  thing: "something",
+  key: {
+    "val": 4
+  }
+}
+```
+
+There are several query operators, documented below.
+
+If you do not use operators, and instead pass in specific values, the following rules apply:
+
+- if a key-path's value is a regular expression, it is interpreted as shorthand for the [$regex](#regex) operator;
+- if a key-path's value is a [javascript primitive](http://en.wikibooks.org/wiki/JavaScript/Variables_and_Types#Primitive_Types), it is interpreted as shorthand for the [$eq](#eq) operator;
+- if a key-path's value is an object that includes non-operators (`$gt`, `$lt`, etc.), it is interpreted as shorthand for the [$eq](#eq) operator.
+
+The following is an example of the above three conditions:
+
+```javascript
+{
+  val1: /someRegexMatch/,
+  val2: true,
+  val3: { $gt: 5, nonOperator: true }
+}
+```
+
 
 #### `$gt`
+
+This condition is true if the value found at the key-path indicated is greater than the provided value.
+
+**Given:**
+```javascript
+{
+  "keypath": { $gt: 5 }
+}
+```
+
+**True:**
+```javascript
+{
+  keypath: 8
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: 4
+}
+```
+
+All comparisons are done [Lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order).
 
 
 #### `$lt`
 
+This condition is true if the value found at the key-path indicated is less than the provided value.
+
+**Given:**
+```javascript
+{
+  "keypath": { $lt: 5 }
+}
+```
+
+**True:**
+```javascript
+{
+  keypath: 4
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: 8
+}
+```
+
+All comparisons are done [lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order).
+
 
 #### `$gte`
+
+This condition is true if the value found at the key-path indicated is greater than or equal to the provided value.
+
+**Given:**
+```javascript
+{
+  "keypath": { $gte: 5 }
+}
+```
+
+**True:**
+```javascript
+{
+  keypath: 5
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: 4.9
+}
+```
+
+All comparisons are done [Lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order).
 
 
 #### `$lte`
 
+This condition is true if the value found at the key-path indicated is less than or equal to the provided value.
+
+**Given:**
+```javascript
+{
+  "keypath": { $lte: 5 }
+}
+```
+
+**True:**
+```javascript
+{
+  keypath: 5
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: 5.1
+}
+```
+
+
+All comparisons are done [Lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order).
+
 
 #### `$neq`
+
+This condition is true if the value found at the key-path indicated is not equal to the provided value.
+
+**Given:**
+```javascript
+{
+  "keypath": { $neq: 5 }
+}
+```
+
+**True:**
+```javascript
+{
+  keypath: 5
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: "hello"
+}
+```
 
 
 #### `$contains`
 
+This condition is true if the value found at the key-path indicated is a string that contains the provided value.
+
+**Given:**
+```javascript
+{
+  "keypath": { $contains: "name" }
+}
+```
+
+**True:**
+```javascript
+{
+  keypath: "Hello, my name is George."
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: "Hello, I am Jerry."
+}
+```
+
 
 #### `$regex`
 
+This condition is true if the value found at the key-path indicated is a string that matches the provided regular expression.
+
+**Given:**
+```javascript
+{
+  "keypath": { $regex: /ion$/ }
+}
+```
+
+**True:**
+```javascript
+{
+  keypath: "diction"
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: "dictionary"
+}
+```
+
 
 #### `$fn`
+
+The `$fn` operator provides a mechanism for queries that are not supported by the other operators.  The `$fn` operator expects a function that returns a truey or falsey value.  This function should take a single argument - this argument will be the object currently being tested for a match.
+
+**Given:**
+```javascript
+{
+  "keypath": {
+    $fn: function (obj) {
+      if (obj.thing) {
+        return _.isArray(obj.thing.deepThing);
+      }
+      return false;
+    }
+  }
+}
+```
+
+**True:**
+```javascript
+{
+  keypath: {
+    thing: {
+      deepThing: ["easy as", 1, 2, 3]
+    }
+  }
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: "I have no thing property."
+}
+```
+
+**False:**
+```javascript
+{
+  keypath: {
+    thing: {
+      deepThing: "I am not an array."
+    }
+  }
+}
+```
+
+If the function throws an error, this will be interpreted as a falsey response.  However, it is still considered best practice to protect against unnecessary and expensive exceptions, such as non-existent deep values in an object.
 
 
 #### `$eq`
@@ -297,7 +558,7 @@ However, it will be very useful in certain circumstances.  For example, what if 
 
 Similarly, what if you're searching for an object that has a sub-property named `$gte` with a particular value?  Instead of `{ a: { $gte: 1 } }`, you could construct a query like so: `{ a: { $eq: { $gte: 1 } } }`.
 
-At present, there is no mechanism to search for an object that has a property matching on of the provided query operators.
+At present, there is no mechanism to search for an object that has a property matching one of the provided query operators.
 
 
 ### Errors
