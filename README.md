@@ -631,7 +631,7 @@ At present, there is no mechanism to search for an object that has a property ma
 The following errors are available as properties on `Recollect.Errors`, and are thrown (or provided as the `reject` ed value) in the indicated circumstances.
 
 | Error name           | Description                                                    |
-| -                    | -                                                              |
+| -----                | -----                                                          |
 | ObjectNotFoundError  | Thrown on `replace` if object with `keyPath` is not found.     |
 | IndexedDbNotFound    | Thrown if IndexedDB is unsupported in browser.                 |
 | ConnectionError      | Thrown upon failure to open database.                          |
