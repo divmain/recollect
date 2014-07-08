@@ -22,9 +22,7 @@ define(["./utils"], function (utils) {
     IndexedDbNotFound: errorFactory("IndexedDbNotFound"),
     ConnectionError: errorFactory("ConnectionError"),
     CursorError: errorFactory("CursorError"),
-    DeletionError: errorFactory("DeletionError"),
     InvalidArgumentError: errorFactory("InvalidArgumentError"),
-    UpdateError: errorFactory("UpdateError"),
     TransactionError: errorFactory("TransactionError"),
     InitializationError: errorFactory("InitializationError")
   };
