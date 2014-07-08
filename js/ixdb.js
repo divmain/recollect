@@ -121,18 +121,22 @@ define([
   };
 
   var createObjectStore = function (options) {
+    var _db;
     return openDatabase(options.dbName, function (db) {
+      _db = db;
       _createObjectStore(db, options);
-    }).finally(function (db) {
-      db.close();
+    }).finally(function () {
+      _db.close();
     });
   };
 
   var deleteObjectStore = function (options) {
+    var _db;
     return openDatabase(options.dbName, function (db) {
+      _db = db;
       db.deleteObjectStore(options.osName);
-    }).finally(function (db) {
-      db.close();
+    }).finally(function () {
+      _db.close();
     });
   };
 
