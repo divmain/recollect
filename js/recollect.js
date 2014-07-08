@@ -166,18 +166,19 @@ define("recollect", [
    * Given a key path to an existing object in the object store, replaces
    * that object with the provided newObject.
    *
-   * @param  {String} keyPath    Key path of object to be overwritten.
+   * @param  {String} key        Key of object to be overwritten.
    * @param  {Object} newObject  Object to be stored.
    *
    * @return {Promise}           Resolves with no value on success.  Rejects
    *                             with ObjectNotFoundError if key does not
    *                             match existing object.
    */
-  ObjectStore.prototype.replace = function (keyPath, newObject) {
+  ObjectStore.prototype.replace = function (key, newObject) {
     return ixdb.replace({
       dbName: this.dbName,
       osName: this.osName,
-      keyPath: keyPath,
+      key: key,
+      keyPath: this.keyPath,
       newObject: newObject
     });
   };

@@ -32,7 +32,7 @@ define([
     return store.index(indexedField).openCursor(keyRange);
   };
 
-  var getCursorForKeyPath = function (store, key) {
+  var getCursorForKey = function (store, key) {
     var keyRange = IDBKeyRange.only(key);
     return store.openCursor(keyRange);
   };
@@ -298,7 +298,7 @@ define([
         var
           transaction = db.transaction([options.osName], "readwrite"),
           store = transaction.objectStore(options.osName),
-          cursor = getCursorForKeyPath(store, options.keyPath),
+          cursor = getCursorForKey(store, options.key),
           success = false;
 
         return new Promise(function (resolve, reject) {
