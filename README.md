@@ -4,6 +4,47 @@ Recollect is an abstraction layer over [IndexedDB](https://developer.mozilla.org
 
 Recollect natively supports all major browsers (IE>10) with the exception of Safari.  Safari support can be attained with the use of a [polyfill](http://nparashuram.com/IndexedDBShim/).  It is asynchronous and non-blocking, and most methods return ES6-compatible promises that resolve to the expected data.
 
+------
+
+## Table of Contents
+
+- [Example](#example)
+- [API](#api)
+    - [Recollect](#recollect-1)
+        - [`new Recollect(dbName)`](#new-recollectdbname)
+        - [`.initialize()` -> `Promise`](#initialize---promise)
+        - [`.createObjectStore(options)` -> `Promise`](#createobjectstoreoptions---promise)
+        - [`.drop()` -> `Promise`](#drop---promise)
+    - [ObjectStore](#objectstore)
+        - [`.find(query)` -> `Promise`](#findquery---promise)
+        - [`.findOne(query)` -> `Promise`](#findonequery---promise)
+        - [`.findByIndex(fieldName, value, query)` -> `Promise`](#findbyindexfieldname-value-query---promise)
+        - [`.findOneByIndex(fieldName, value, query)` -> `Promise`](#findonebyindexfieldname-value-query---promise)
+        - [`.insertOne(newObject)` -> `Promise`](#insertonenewobject---promise)
+        - [`.insertMany(newObjects)` -> `Promise`](#insertmanynewobjects---promise)
+        - [`.update(options)` -> `Promise`](#updateoptions---promise)
+        - [`.replace(keyPath, newObject)` -> `Promise`](#replacekeypath-newobject---promise)
+        - [`.delete(key)` -> `Promise`](#deletekey---promise)
+        - [`.drop()` -> `Promise`](#drop---promise-1)
+- [Queries](#queries)
+    - [`$gt` operator](#$gt-operator)
+    - [`$lt` operator](#$lt-operator)
+    - [`$gte` operator](#$gte-operator)
+    - [`$lte` operator](#$lte-operator)
+    - [`$neq` operator](#$neq-operator)
+    - [`$contains` operator](#$contains-operator)
+    - [`$regex` operator](#$regex-operator)
+    - [`$fn` operator](#$fn-operator)
+    - [`$eq` operator](#$eq-operator)
+- [Errors](#errors)
+- [Roadmap](#roadmap)
+
+
+
+------
+
+## Example
+
 Here's a quick look at what you can do.
 
 ```javascript
@@ -40,6 +81,9 @@ landOfOz.characters
 
 landOfOz.drop();
 ```
+
+
+------
 
 ## API
 
@@ -98,6 +142,8 @@ Destroys the database.
 
 The returned promise resolves to `undefined` on success.
 
+
+------
 
 ### ObjectStore
 
@@ -246,6 +292,13 @@ Given a query, finds all matching objects and overwrites any properties in each 
 The returned promise resolves to `undefined`.
 
 
+#### `.replace(keyPath, newObject)` -> `Promise`
+
+Given a unique `keyPath`, replaces the identified object with the provided `newObject`
+
+The returned promise resolves to `undefined`.
+
+
 #### `.delete(key)` -> `Promise`
 
 Given a unique key, finds object with key and removes it from the object store.
@@ -260,7 +313,9 @@ Removes the object store from the database.
 The returned promise resolves to `undefined`.
 
 
-### Queries
+------
+
+## Queries
 
 Query-literals are fundamental to extracting data from your databases.  They're used by several methods, including the [find](#findquery---promise)-class methods and [update](#updateoptions---promise).
 
@@ -315,7 +370,7 @@ If you have an object with a property that contains an actual `.` character, you
 ```
 
 
-#### `$gt`
+### `$gt` operator
 
 This condition is true if the value found at the key-path indicated is greater than the provided value.
 
@@ -343,7 +398,7 @@ This condition is true if the value found at the key-path indicated is greater t
 All comparisons are done [Lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order).
 
 
-#### `$lt`
+### `$lt` operator
 
 This condition is true if the value found at the key-path indicated is less than the provided value.
 
@@ -371,7 +426,7 @@ This condition is true if the value found at the key-path indicated is less than
 All comparisons are done [lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order).
 
 
-#### `$gte`
+### `$gte` operator
 
 This condition is true if the value found at the key-path indicated is greater than or equal to the provided value.
 
@@ -399,7 +454,7 @@ This condition is true if the value found at the key-path indicated is greater t
 All comparisons are done [Lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order).
 
 
-#### `$lte`
+### `$lte` operator
 
 This condition is true if the value found at the key-path indicated is less than or equal to the provided value.
 
@@ -428,7 +483,7 @@ This condition is true if the value found at the key-path indicated is less than
 All comparisons are done [Lexicographically](http://en.wikipedia.org/wiki/Lexicographical_order).
 
 
-#### `$neq`
+### `$neq` operator
 
 This condition is true if the value found at the key-path indicated is not equal to the provided value.
 
@@ -454,7 +509,7 @@ This condition is true if the value found at the key-path indicated is not equal
 ```
 
 
-#### `$contains`
+### `$contains` operator
 
 This condition is true if the value found at the key-path indicated is a string that contains the provided value.
 
@@ -480,7 +535,7 @@ This condition is true if the value found at the key-path indicated is a string 
 ```
 
 
-#### `$regex`
+### `$regex` operator
 
 This condition is true if the value found at the key-path indicated is a string that matches the provided regular expression.
 
@@ -506,7 +561,7 @@ This condition is true if the value found at the key-path indicated is a string 
 ```
 
 
-#### `$fn`
+### `$fn` operator
 
 The `$fn` operator provides a mechanism for queries that are not supported by the other operators.  The `$fn` operator expects a function that returns a truey or falsey value.  This function should take a single argument - this argument will be the object currently being tested for a match.
 
@@ -556,7 +611,7 @@ The `$fn` operator provides a mechanism for queries that are not supported by th
 If the function throws an error, this will be interpreted as a falsey response.  However, it is still considered best practice to protect against unnecessary and expensive exceptions, such as non-existent deep values in an object.
 
 
-#### `$eq`
+### `$eq` operator
 
 In many situations, the `$eq` operator will provide little benefit.  The query `{ name: "Bob" }` behaves identically to `{ name: { $eq: "Bob" } }`
 
@@ -569,8 +624,24 @@ Similarly, what if you're searching for an object that has a sub-property named 
 At present, there is no mechanism to search for an object that has a property matching one of the provided query operators.
 
 
-### Errors
+-----
+
+## Errors
+
+The following errors are available as properties on `Recollect.Errors`, and are thrown (or provided as the `reject` ed value) in the indicated circumstances.
+
+| Error name           | Description                                                    |
+| -                    | -                                                              |
+| ObjectNotFoundError  | Thrown on `replace` if object with `keyPath` is not found.     |
+| IndexedDbNotFound    | Thrown if IndexedDB is unsupported in browser.                 |
+| ConnectionError      | Thrown upon failure to open database.                          |
+| CursorError          | Thrown upon unexpected condition while iterating over records. |
+| InvalidArgumentError | Thrown if required options not provided or invalid.            |
+| TransactionError     | Thrown upon unexpected condition while performing transaction. |
+| InitializationError  | Thrown if initialization happens improperly or more than once. |
 
 
-### Roadmap
+-----
+
+## Roadmap
 
