@@ -39,7 +39,13 @@ define(["lodash", "./errors"], function (_) {
       return regex.test(deepValue);
     },
     $fn: function (deepValue, testFn) {
-      return testFn(deepValue);
+      var isMatch = false;
+      try {
+        isMatch = testFn(deepValue);
+      } catch (e) {
+        isMatch = false;
+      }
+      return isMatch;
     }
   };
 
