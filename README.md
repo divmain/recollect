@@ -306,6 +306,14 @@ The following is an example of the above three conditions:
 }
 ```
 
+If you have an object with a property that contains an actual `.` character, you can escape it like so:
+
+```javascript
+{
+  "shallow\\.key": "someValue"
+}
+```
+
 
 #### `$gt`
 
