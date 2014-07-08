@@ -615,13 +615,13 @@ If the function throws an error, this will be interpreted as a falsey response. 
 
 In many situations, the `$eq` operator will provide little benefit.  The query `{ name: "Bob" }` behaves identically to `{ name: { $eq: "Bob" } }`
 
-However, it will be very useful in certain circumstances.  For example, what if you are searching for an object that has a regular expression as a property?  If we were to query like so, `{ a: /er$/ }`, it wouldn't find an object whose `a` property equals `/er$/`, it would find an object whose property matches the pattern.
+However, it will be very useful in certain circumstances.  For example, what if you are searching for an object that has a regular expression as a property?  If we were to query like so, `{ a: /er$/ }`, it wouldn't find an object whose `a` property equals `/er$/`.  It would find an object whose property matches the pattern.
 
-`$eq` provides an alternative: `{ a: { eq: /er$/ } }`.
+`$eq` provides an alternative: `{ a: { $eq: /er$/ } }`.
 
-Similarly, what if you're searching for an object that has a sub-property named `$gte` with a particular value?  Instead of `{ a: { $gte: 1 } }`, you could construct a query like so: `{ a: { $eq: { $gte: 1 } } }`.
+Similarly, consider a situation where you are searching for an object with sub-property `$gte`.  If you were testing for equality, instead of `{ a: { $gte: 1 } }`, you could construct a query like so: `{ a: { $eq: { $gte: 1 } } }`.
 
-At present, there is no mechanism to search for an object that has a property matching one of the provided query operators.
+Note that, at present, there is no mechanism to search for an object that has a property name matching one of the provided query operators.
 
 
 -----
