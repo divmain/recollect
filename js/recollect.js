@@ -186,15 +186,15 @@ define("recollect", [
   /**
    * Deletes object from store by key.
    *
-   * @param  {String} keyPath  Value corresponding to keyPath in object to delete.
+   * @param  {String} key      Value corresponding to keyPath in object to delete.
    *
    * @return {Promise}         Resolves with no value on success.
    */
-  ObjectStore.prototype.delete = function (keyPath) {
+  ObjectStore.prototype.delete = function (key) {
     return ixdb.del({
       dbName: this.dbName,
       osName: this.osName,
-      keys: [keyPath]
+      keys: [key]
     });
   };
 
