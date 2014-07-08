@@ -628,7 +628,7 @@ At present, there is no mechanism to search for an object that has a property ma
 
 ## Errors
 
-The following errors are available as properties on `Recollect.Errors`, and are thrown (or provided as the `reject` ed value) in the indicated circumstances.
+The following error prototypes are available as properties on `Recollect.Errors`.  They  are thrown (or provided as the `reject`-ed value) in the indicated circumstances.
 
 | Error name           | Description                                                    |
 | -----                | -----                                                          |
