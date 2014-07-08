@@ -245,10 +245,12 @@ define([
   };
 
   var _update = function (newProperties, query, e) {
-    var
-      cursor = e.target.result,
-      value = cursor.value;
+    var value,
+      cursor = e.target.result;
+
     if (!cursor) { return; }
+    value = cursor.value;
+
     if (!query || query.isMatch(cursor.value)) {
       _.extend(value, newProperties);
       cursor.update(value);
