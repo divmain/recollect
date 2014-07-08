@@ -2,8 +2,9 @@ define([
   "lodash",
   "bluebird",
   "./errors",
-  "./query"
-], function (_, Promise, Errors, Query) {
+  "./query",
+  "./utils"
+], function (_, Promise, Errors, Query, utils) {
 
   Promise.longStackTraces();
 
@@ -302,9 +303,19 @@ define([
 
         return new Promise(function (resolve, reject) {
           cursor.onsuccess = function (e) {
-            var cursor = e.target.result;
+            var newObject, keypathArray,
+              cursor = e.target.result;
             if (!cursor) { return; }
-            cursor.update(options.newObject);
+
+            keypathArray = utils.getKeypathArray(options.keyPath);
+            newObject = _.clone(options.newObject);
+            utils.setDeepValue(
+              newObject,
+              keypathArray,
+              utils.getDeepValue(cursor.value, keypathArray)
+            );
+
+            cursor.update(newObject);
             success = true;
             cursor.continue();
           };

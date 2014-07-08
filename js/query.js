@@ -1,6 +1,7 @@
-define(["lodash", "./errors"], function (_) {
-  var
-    splitOn = /\./;
+define([
+  "lodash",
+  "./utils"
+], function (_, utils) {
 
   var isEqlRegex = function (objA, objB) {
     return _.isRegExp(objA) &&
@@ -49,47 +50,6 @@ define(["lodash", "./errors"], function (_) {
     }
   };
 
-  /**
-   * Splits keypath on non-escaped period.
-   *
-   * @param  {String} keypath  "Escapeable\\.period.delimited.keypath"
-   * @return {Array}           ["Escapeable.period", "delimited", "keypath"]
-   */
-  var getKeypathArray = function (keypath) {
-    var
-      kpArray = keypath.split(splitOn),
-      nodesToMerge = [];
-
-    if (kpArray.length === 1) { return kpArray; }
-
-    _.each(kpArray, function (node, index) {
-      if (node[node.length - 1] === "\\") { nodesToMerge.push(index); }
-    });
-    nodesToMerge.reverse();
-
-    _.each(nodesToMerge, function (index) {
-      var removed;
-      if (index === kpArray.length - 1) { return; }
-      removed = kpArray.splice(index + 1, 1);
-      kpArray[index] = kpArray[index].slice(0, -1) + "." + removed;
-    });
-
-    return kpArray;
-  };
-
-  var getDeepValue = function (object, keypathArray) {
-    var
-      ref = object;
-
-    for (var i = 0; i < keypathArray.length; i++) {
-      var keyAtNode = keypathArray[i];
-      ref = ref[keyAtNode];
-      if (_.isUndefined(ref)) { return undefined; }
-    }
-
-    return ref;
-  };
-
   var isComparisonObj = function (comparisonObj) {
     return _.all(comparisonObj, function (referenceValue, operator) {
       return operator in operators;
@@ -112,7 +72,7 @@ define(["lodash", "./errors"], function (_) {
         conditions = { $eq: queryAspect };
       }
       return {
-        keypathArray: getKeypathArray(keypath),
+        keypathArray: utils.getKeypathArray(keypath),
         conditions: conditions
       };
     });
@@ -120,7 +80,7 @@ define(["lodash", "./errors"], function (_) {
 
   Query.prototype.isMatch = function (obj) {
     return _.all(this._query, function (queryAspect) {
-      var deepValue = getDeepValue(obj, queryAspect.keypathArray);
+      var deepValue = utils.getDeepValue(obj, queryAspect.keypathArray);
       return !_.isUndefined(deepValue) && queryAspect.conditions &&
         _.all(queryAspect.conditions, function (referenceValue, operator) {
           return operators[operator](deepValue, referenceValue);
