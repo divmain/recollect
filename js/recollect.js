@@ -103,13 +103,13 @@ define("recollect", [
    */
   ObjectStore.prototype.insertOne = function (newRecord) {
     if (!_.isObject(newRecord)) {
-      throw new Error.InvalidArgumentError("insertOne requires newRecord as argument");
+      throw new Errors.InvalidArgumentError("insertOne requires newRecord as argument");
     }
     if (this.autoIncrement && !_.isUndefined(newRecord[this.keyPath])) {
-      throw new Error.InvalidArgumentError("newRecord cannot contain keyPath property");
+      throw new Errors.InvalidArgumentError("newRecord cannot contain keyPath property");
     }
     if (!this.autoIncrement && _.isUndefined(newRecord[this.keyPath])) {
-      throw new Error.InvalidArgumentError("newRecord must contain keyPath property");
+      throw new Errors.InvalidArgumentError("newRecord must contain keyPath property");
     }
 
     return ixdb.add({
