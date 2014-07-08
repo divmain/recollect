@@ -38,10 +38,13 @@ var config = {
 };
 
 config.webpack = {
-  context: config.srcFullPath,
+  context: config.root,
   cache: true,
   entry: {
     recollect: "./recollect.js"
+  },
+  resolve: {
+    root: config.root
   },
   output: {
     path: config.destFullPath,
@@ -118,7 +121,7 @@ gulp.task("server", function () {
     open: {},
     livereload: true,
     port: config.port
-  }).apply(this, arguments);
+  });
 });
 
 gulp.task("server:test", function () {
@@ -129,7 +132,7 @@ gulp.task("server:test", function () {
     },
     livereload: true,
     port: config.testPort
-  }).apply(this.arguments);
+  });
 });
 
 gulp.task("reload:build", ["build-dev"], function () {
@@ -197,7 +200,8 @@ gulp.task("build:test", function (callback) {
 
   var webpackConf = _.extend({}, config.webpack, {
     entry: {
-      test: path.join(config.specFullPath, "test-runner.js")
+      test: "spec/test-runner.js"
+      // test: path.join(config.specFullPath, "test-runner.js")
     },
     output: {
       path: config.testFullPath,
