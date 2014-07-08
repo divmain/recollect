@@ -105,9 +105,11 @@ define("recollect", [
     if (!_.isObject(newRecord)) {
       throw new Errors.InvalidArgumentError("insertOne requires newRecord as argument");
     }
+    // TODO: Use utils.getKeypathArray and utils.getDeepValue
     if (this.autoIncrement && !_.isUndefined(newRecord[this.keyPath])) {
       throw new Errors.InvalidArgumentError("newRecord cannot contain keyPath property");
     }
+    // TODO: Use utils.getKeypathArray and utils.getDeepValue
     if (!this.autoIncrement && _.isUndefined(newRecord[this.keyPath])) {
       throw new Errors.InvalidArgumentError("newRecord must contain keyPath property");
     }
@@ -133,6 +135,7 @@ define("recollect", [
       throw new Error.InvalidArgumentError("newRecords must be an array");
     }
     _.each(newRecords, function (record) {
+      // TODO: Use utils.getKeypathArray and utils.getDeepValue
       if (!_.isUndefined(record._id)) {
         throw new Error.InvalidArgumentError("new records cannot contain `_id` property");
       }

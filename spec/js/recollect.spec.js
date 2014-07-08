@@ -3,6 +3,8 @@ define([
 ], function (
   Recollect
 ) {
+  var ObjectStore = Recollect.prototype.ObjectStore;
+
   describe("recollect", function () {
     describe("ObjectStore", function () {
       describe("find", function () {
