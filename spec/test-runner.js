@@ -1,6 +1,6 @@
 document.write("<div id=\"mocha\"></div>");
 
-require("!style!css!mocha/mocha.css");
+require("!css-loader!mocha/mocha.css");
 require("!script!mocha/mocha.js");
 require("!script!sinon/pkg/sinon.js");
 

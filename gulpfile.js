@@ -46,6 +46,11 @@ config.webpack = {
   resolve: {
     root: config.root
   },
+  module: {
+    loaders: [
+      { test: /\.css$/, loader: "style-loader!css-loader" },
+    ]
+  },
   output: {
     path: config.destFullPath,
     publicPath: config.js + "/",
