@@ -27,15 +27,15 @@ Recollect natively supports all major browsers (IE>10) with the exception of Saf
         - [`.delete(key)` -> `Promise`](#deletekey---promise)
         - [`.drop()` -> `Promise`](#drop---promise-1)
 - [Queries](#queries)
-    - [`$gt` operator](#$gt-operator)
-    - [`$lt` operator](#$lt-operator)
-    - [`$gte` operator](#$gte-operator)
-    - [`$lte` operator](#$lte-operator)
-    - [`$neq` operator](#$neq-operator)
-    - [`$contains` operator](#$contains-operator)
-    - [`$regex` operator](#$regex-operator)
-    - [`$fn` operator](#$fn-operator)
-    - [`$eq` operator](#$eq-operator)
+    - [`$gt` operator](#gt-operator)
+    - [`$lt` operator](#lt-operator)
+    - [`$gte` operator](#gte-operator)
+    - [`$lte` operator](#lte-operator)
+    - [`$neq` operator](#neq-operator)
+    - [`$contains` operator](#contains-operator)
+    - [`$regex` operator](#regex-operator)
+    - [`$fn` operator](#fn-operator)
+    - [`$eq` operator](#eq-operator)
 - [Errors](#errors)
 - [Roadmap](#roadmap)
 
@@ -347,9 +347,9 @@ There are several query operators, documented below.
 
 If you do not use operators, and instead pass in specific values, the following rules apply:
 
-- if a key-path's value is a regular expression, it is interpreted as shorthand for the [$regex](#regex) operator;
-- if a key-path's value is a [javascript primitive](http://en.wikibooks.org/wiki/JavaScript/Variables_and_Types#Primitive_Types), it is interpreted as shorthand for the [$eq](#eq) operator;
-- if a key-path's value is an object that includes non-operators (`$gt`, `$lt`, etc.), it is interpreted as shorthand for the [$eq](#eq) operator.
+- if a key-path's value is a regular expression, it is interpreted as shorthand for the [$regex](#regex-operator) operator;
+- if a key-path's value is a [javascript primitive](http://en.wikibooks.org/wiki/JavaScript/Variables_and_Types#Primitive_Types), it is interpreted as shorthand for the [$eq](#eq-operator) operator;
+- if a key-path's value is an object that includes non-operators (`$gt`, `$lt`, etc.), it is interpreted as shorthand for the [$eq-operator](#eq) operator.
 
 The following is an example of the above three conditions:
 
