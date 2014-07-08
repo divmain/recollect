@@ -13,7 +13,7 @@ define(["lodash", "./errors"], function (_) {
 
   var operators = {
     $eq: function (deepValue, referenceValue) {
-      return isEqlRegex(deepValue, referenceValue) || deepValue === referenceValue;
+      return isEqlRegex(deepValue, referenceValue) || _.isEqual(deepValue, referenceValue);
     },
     $gt: function (deepValue, referenceValue) {
       return deepValue > referenceValue;
