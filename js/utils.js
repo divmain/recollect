@@ -31,7 +31,7 @@ define([
       kpArray[index] = kpArray[index].slice(0, -1) + "." + removed;
     });
 
-    return kpArray;
+    return _.compact(kpArray);
   };
 
   var getDeepValue = function (object, keypathArray) {
