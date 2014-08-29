@@ -626,6 +626,49 @@ Note that, at present, there is no mechanism to search for an object that has a 
 
 -----
 
+## Meta-data
+
+For each object that Recollect stores, metadata related to that object is also stored.  You can access this metadata with the special keypath namespace `$meta`.  Standard operators can be used to query this metadata alongside any other conditions.
+
+**Note:**  Because the `$meta` keypath is reserved by Recollect, you cannot use it to perform queries for objects that contain property `$meta`.
+
+
+### `$meta.created` -> UTC timestamp
+
+This is an integer representing the number of milliseconds since the epoch when the object was created.  It is set once, when the object is originally added to the object store.
+
+It has no relation to corresponding backend records, should they exist, or the life-cycle of those records.
+
+**Example:**
+
+```javascript
+{
+  // find any records created on or before midnight on January 1, 1985
+  "$meta.created": {
+    $lte: 473414400000
+  }
+}
+```
+
+
+### `$meta.modified` -> UTC timestamp
+
+This is an integer representing the number of milliseconds since the epoch when the object was last updated.  It is updated whenever a change is made.  If no change has ever been made, its value will be `null`.
+
+**Example:**
+
+```javascript
+{
+  // find any records modified after 16:45, February 5, 2014
+  "$meta.modified": {
+    $gt: new Date(2014, 1, 5, 16, 45).getTime()
+  }
+}
+```
+
+
+-----
+
 ## Errors
 
 The following error prototypes are available as properties on `Recollect.Errors`.  They  are thrown (or provided as the `reject`-ed value) in the indicated circumstances.
