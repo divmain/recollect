@@ -146,7 +146,7 @@ define([
 
     return new Promise(function (resolve, reject) {
       connection.onerror = function (e) {
-        reject(new Errors.ConnectionError(e));
+        reject(new Errors.ConnectionError(e.target.error));
       };
 
       connection.onsuccess = function (e) {
@@ -190,7 +190,7 @@ define([
 
         return new Promise(function (resolve, reject) {
           cursor.onerror = function (e) {
-            reject(new Errors.CursorError(e));
+            reject(new Errors.CursorError(e.target.error));
           };
 
           transaction.oncomplete = function (/* e */) {
@@ -198,7 +198,7 @@ define([
           };
 
           transaction.onerror = function (e) {
-            reject(new Errors.TransactionError(e));
+            reject(new Errors.TransactionError(e.target.error));
           };
         });
       })
@@ -235,7 +235,7 @@ define([
           };
 
           transaction.onerror = function (e) {
-            reject(new Errors.TransactionError(e));
+            reject(new Errors.TransactionError(e.target.error));
           };
         });
       })
@@ -274,7 +274,7 @@ define([
 
         return new Promise(function (resolve, reject) {
           cursor.onerror = function (e) {
-            reject(new Errors.CursorError(e));
+            reject(new Errors.CursorError(e.target.error));
           };
 
           transaction.oncomplete = function (/* e */) {
@@ -282,7 +282,7 @@ define([
           };
 
           transaction.onerror = function (e) {
-            reject(new Errors.TransactionError(e));
+            reject(new Errors.TransactionError(e.target.error));
           };
         });
       })
@@ -323,7 +323,7 @@ define([
           };
 
           cursor.onerror = function (e) {
-            reject(new Errors.CursorError(e));
+            reject(new Errors.CursorError(e.target.error));
           };
 
           transaction.oncomplete = function (/* e */) {
@@ -334,7 +334,7 @@ define([
           };
 
           transaction.onerror = function (e) {
-            reject(new Errors.TransactionError(e));
+            reject(new Errors.TransactionError(e.target.error));
           };
         });
       })
