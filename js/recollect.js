@@ -16,10 +16,10 @@ define("recollect", [
   var getIxdbQuery = function (query) {
     return _.chain(query)
       .map(function (val, keyPath) {
-        if (!keyPath.startsWith("$meta.")) {
+        if (keyPath.indexOf("$meta.") !== 0) {
           keyPath = "$data." + keyPath;
         }
-        return [val, keyPath];
+        return [keyPath, val];
       })
       .object()
       .value();
@@ -82,6 +82,10 @@ define("recollect", [
       osName: this.osName,
       query: getIxdbQuery(query),
       findMany: true
+    }).then(function (records) {
+      return _.map(records, function (record) {
+        return record.$data;
+      });
     });
   };
 
@@ -100,7 +104,7 @@ define("recollect", [
       query: getIxdbQuery(query),
       findMany: false
     }).then(function (records) {
-      return records.length && records[0] || undefined;
+      return records.length && records[0].$data || undefined;
     });
   };
 
@@ -123,6 +127,10 @@ define("recollect", [
       findMany: true,
       indexedFieldName: indexedFieldName,
       indexedValue: indexedValue
+    }).then(function (records) {
+      return _.map(records, function (record) {
+        return record.$data;
+      });
     });
   };
 
@@ -145,7 +153,7 @@ define("recollect", [
       indexedFieldName: indexedFieldName,
       indexedValue: indexedValue
     }).then(function (records) {
-      return records.length && records[0] || undefined;
+      return records.length && records[0].$data || undefined;
     });
   };
 
