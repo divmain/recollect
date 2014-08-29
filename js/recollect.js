@@ -131,13 +131,13 @@ define("recollect", [
    * @return {Promise}           Resolves to array of keys of inserted objects.
    */
   ObjectStore.prototype.insertMany = function (newRecords) {
-    if (!_.isArray(newRecords)) {
-      throw new Error.InvalidArgumentError("newRecords must be an array");
+    if (!_.isArray(newRecords) || newRecords.length < 1) {
+      throw new Errors.InvalidArgumentError("newRecords must be an array");
     }
     _.each(newRecords, function (record) {
       // TODO: Use utils.getKeypathArray and utils.getDeepValue
       if (!_.isUndefined(record._id)) {
-        throw new Error.InvalidArgumentError("new records cannot contain `_id` property");
+        throw new Errors.InvalidArgumentError("new records cannot contain `_id` property");
       }
     });
 
