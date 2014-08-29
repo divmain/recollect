@@ -38,7 +38,7 @@ var config = {
 };
 
 config.webpack = {
-  context: config.root,
+  context: config.srcFullPath,
   cache: true,
   entry: {
     recollect: "./recollect.js"
@@ -46,14 +46,8 @@ config.webpack = {
   resolve: {
     root: config.root
   },
-  module: {
-    loaders: [
-      { test: /\.css$/, loader: "style-loader!css-loader" },
-    ]
-  },
   output: {
     path: config.destFullPath,
-    publicPath: config.js + "/",
     filename: "[name].bundle.js",
     chunkFilename: "[id].bundle.js",
     sourceMapFilename: "[file].map",
