@@ -6,6 +6,61 @@ define("recollect", [
 ], function (_, Errors, ixdb, utils) {
 
   /**
+   * Return modified query, accounting for Recollect-specific storage format for
+   * records in IndexedDB object store.
+   *
+   * @param  {Object} query Query-literal.
+   *
+   * @return {Object}       Query-literal with modified keypaths.
+   */
+  var getIxdbQuery = function (query) {
+    return _.chain(query)
+      .map(function (val, keyPath) {
+        if (!keyPath.startsWith("$meta.")) {
+          keyPath = "$data." + keyPath;
+        }
+        return [val, keyPath];
+      })
+      .object()
+      .value();
+  };
+
+  /**
+   * Given an object to store, return a corresponding object conforming to Recollect's
+   * storage format.
+   *
+   * @param  {Object} newRecord   Object to store
+   *
+   * @return {Object}             New Recollect record.
+   */
+  var getNewRecord = function (newRecord) {
+    return {
+      $data: newRecord,
+      $meta: {
+        created: Date.now(),
+        modified: null
+      }
+    };
+  };
+
+  /**
+   * Given properties with which to update Recollect records, return corresponding
+   * object to merge into existing records.
+   *
+   * @param  {Object} updatedProperties   Record updates.
+   *
+   * @return {Object}                     Object to merge into matching records.
+   */
+  var getRecordUpdate = function (updatedProperties) {
+    return {
+      $data: updatedProperties,
+      $meta: {
+        modified: Date.now()
+      }
+    }
+  };
+
+  /**
    * Constructor for ObjectStore.  Should not be instantiated directly.
    */
   var ObjectStore = function (options) {
@@ -25,7 +80,7 @@ define("recollect", [
     return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
-      query: query,
+      query: getIxdbQuery(query),
       findMany: true
     });
   };
@@ -42,7 +97,7 @@ define("recollect", [
     return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
-      query: query,
+      query: getIxdbQuery(query),
       findMany: false
     }).then(function (records) {
       return records.length && records[0] || undefined;
@@ -64,7 +119,7 @@ define("recollect", [
     return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
-      query: query,
+      query: getIxdbQuery(query),
       findMany: true,
       indexedFieldName: indexedFieldName,
       indexedValue: indexedValue
@@ -85,7 +140,7 @@ define("recollect", [
     return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
-      query: query,
+      query: getIxdbQuery(query),
       findMany: false,
       indexedFieldName: indexedFieldName,
       indexedValue: indexedValue
@@ -117,7 +172,7 @@ define("recollect", [
     return ixdb.add({
       dbName: this.dbName,
       osName: this.osName,
-      records: [newRecord]
+      records: [getNewRecord(newRecord)]
     }).then(function (ids) {
       return ids[0];
     });
@@ -144,7 +199,7 @@ define("recollect", [
     return ixdb.add({
       dbName: this.dbName,
       osName: this.osName,
-      records: newRecords
+      records: _.map(newRecords, getNewRecord)
     });
   };
 
@@ -160,6 +215,10 @@ define("recollect", [
     options = utils.normalizeOptions(options, ["query", "newProperties"], {
       dbName: this.dbName,
       osName: this.osName
+    });
+
+    options = _.extend({}, options, {
+      newProperties: getRecordUpdate(newProperties)
     });
 
     return ixdb.update(options);
@@ -182,7 +241,7 @@ define("recollect", [
       osName: this.osName,
       key: key,
       keyPath: this.keyPath,
-      newObject: newObject
+      newObject: getNewRecord(newObject)
     });
   };
 

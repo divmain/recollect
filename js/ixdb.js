@@ -252,7 +252,7 @@ define([
     value = cursor.value;
 
     if (!query || query.isMatch(cursor.value)) {
-      _.extend(value, newProperties);
+      _.merge(value, newProperties);
       cursor.update(value);
     }
     cursor.continue();
