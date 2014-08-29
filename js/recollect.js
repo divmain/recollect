@@ -367,6 +367,8 @@ define("recollect", [
       indexes: {}
     });
 
+    var created = Date.now();
+
     return ixdb.createObjectStore(_.extend({}, options, { dbName: this.dbName }))
       .then(function (/* object store */) {
         return ixdb.add({
@@ -377,13 +379,20 @@ define("recollect", [
             autoIncrement: options.autoIncrement,
             keyPath: options.keyPath,
             indexes: options.indexes,
-            created: (new Date()).getTime(),
+            created: created,
             lastSynced: null
           }]
         });
       })
       .then(function () {
-        initObjectStoreObject(self, { osName: options.osName });
+        initObjectStoreObject(self, {
+          osName: options.osName,
+          autoIncrement: options.autoIncrement,
+          keyPath: options.keyPath,
+          indexes: options.indexes,
+          created: created,
+          lastSynced: null
+        });
       });
   };
 
