@@ -197,6 +197,9 @@ gulp.task("build:test", function (callback) {
   gulp.src(path.join(config.specFullPath, "test-runner.html"))
     .pipe(gulp.dest(config.testFullPath));
 
+  gulp.src(path.join(config.specFullPath, "mocha.css"))
+    .pipe(gulp.dest(config.testFullPath));
+
   var webpackConf = _.extend({}, config.webpack, {
     entry: {
       test: "spec/test-runner.js"
