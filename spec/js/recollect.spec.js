@@ -1,9 +1,11 @@
 define([
+  "bluebird",
   "js/recollect",
   "js/ixdb",
   "js/errors",
   "spec/test-utils"
 ], function (
+  Promise,
   Recollect,
   ixdb,
   Errors,
@@ -23,25 +25,74 @@ define([
 
     describe("ObjectStore", function () {
       describe("find", function () {
-        it("defers to ixdb.get, providing necessary options", function () {
-          var
-            objectStore = new ObjectStore({
-              dbName: "testDb",
-              osName: "testOs",
-            }),
-            query = {
-              prop1: { $lt: 5 }
-            };
+        var objectStore, query, result;
 
-          sandbox.stub(ixdb, "get");
+        beforeEach(function () {
+          objectStore = new ObjectStore({
+            dbName: "testDb",
+            osName: "testOs"
+          });
+
+          query = {
+            prop1: { $lt: 5 }
+          };
+
+          result = [{
+            $data: {
+              prop1: 3
+            },
+            $meta: {
+              modified: 999,
+              created: 999
+            }
+          }, {
+            $data: {
+              prop1: 2
+            },
+            $meta: {
+              modified: 999,
+              created: 999
+            }
+          }];
+
+          sandbox.stub(ixdb, "get").returns(Promise.resolve(result));
+        });
+
+        it("calls ixdb.get with dbName option", function () {
+          objectStore.find(query);
+          expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
+        });
+
+        it("calls ixdb.get with osName option", function () {
+          objectStore.find(query);
+          expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
+        });
+
+        it("calls ixdb.get with findMany === true", function () {
+          objectStore.find(query);
+          expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", true);
+        });
+
+        it("calls ixdb.get with modified query", function () {
+          var modifiedQuery = _.chain(query)
+            .map(function (val, key) {
+              return ["$data." + key, val];
+            })
+            .object()
+            .value();
 
           objectStore.find(query);
+          expect(ixdb.get.getCall(0).args[0].query).to.deep.eql(modifiedQuery);
+        });
 
-          expect(ixdb.get).to.have.been.calledOnce;
-          expect(ixdb.get.args[0][0]).to.have.property("dbName", "testDb");
-          expect(ixdb.get.args[0][0]).to.have.property("osName", "testOs");
-          expect(ixdb.get.args[0][0]).to.have.property("findMany", true);
-          expect(ixdb.get.args[0][0]).to.have.property("query", query);
+        it("resolves to an array of record data", function (done) {
+          objectStore.find(query).then(function (records) {
+            testUtils.captureExceptions(done, function () {
+              expect(records).to.have.length(2);
+              expect(records[0]).to.have.property("prop1", 3);
+              expect(records[1]).to.have.property("prop1", 2);
+            });
+          });
         });
       });
 

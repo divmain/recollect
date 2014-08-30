@@ -6,6 +6,14 @@ define([], function () {
         catch: sinon.stub(),
         finally: sinon.stub
       };
+    },
+    captureExceptions: function (cb, fn) {
+      try {
+        fn();
+        cb();
+      } catch (error) {
+        cb(error);
+      }
     }
   };
 });
