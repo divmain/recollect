@@ -64,8 +64,7 @@ define("recollect", [
    * Constructor for ObjectStore.  Should not be instantiated directly.
    */
   var ObjectStore = function (options) {
-    options = options || {};
-    _.extend(this, options);
+    _.extend(this, options || {});
   };
 
   /**
