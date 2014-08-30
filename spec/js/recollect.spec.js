@@ -68,7 +68,7 @@ define([
           expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
         });
 
-        it("calls ixdb.get with findMany === true", function () {
+        it("calls ixdb.get with findMany option === true", function () {
           objectStore.find(query);
           expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", true);
         });
@@ -97,63 +97,83 @@ define([
       });
 
       describe("findOne", function () {
-        it("defers to ixdb.get, providing necessary options", function () {
-          var
-            objectStore = new ObjectStore({
-              dbName: "testDb",
-              osName: "testOs"
-            }),
-            query = {
-              prop1: { $lt: 5 }
-            };
+        var objectStore, query, result;
 
-          sandbox.stub(ixdb, "get").returns(new testUtils.fakePromise());
+        beforeEach(function () {
+          objectStore = new ObjectStore({
+            dbName: "testDb",
+            osName: "testOs"
+          });
 
-          objectStore.findOne(query);
+          query = {
+            prop1: { $lt: 5 }
+          };
 
-          expect(ixdb.get).to.have.been.calledOnce;
-          expect(ixdb.get.args[0][0]).to.have.property("dbName", "testDb");
-          expect(ixdb.get.args[0][0]).to.have.property("osName", "testOs");
-          expect(ixdb.get.args[0][0]).to.have.property("findMany", false);
-          expect(ixdb.get.args[0][0]).to.have.property("query", query);
+          result = [{
+            $data: {
+              prop1: 3
+            },
+            $meta: {
+              modified: 999,
+              created: 999
+            }
+          }, {
+            $data: {
+              prop1: 2
+            },
+            $meta: {
+              modified: 999,
+              created: 999
+            }
+          }];
+
+          sandbox.stub(ixdb, "get").returns(Promise.resolve(result));
         });
 
-        it("resolves to the first result found", function () {
-          var
-            objectStore = new ObjectStore({
-              dbName: "testDb",
-              osName: "testOs"
-            }),
-            query = {
-              prop1: { $lt: 5 }
-            },
-            fakePromise = new testUtils.fakePromise();
-
-          sandbox.stub(ixdb, "get").returns(fakePromise);
+        it("calls ixdb.get with dbName option", function () {
           objectStore.findOne(query);
-
-          var thenCb = fakePromise.then.args[0][0];
-
-          expect(thenCb([1, 2])).to.eql(1);
+          expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
         });
 
-        it("resolves to undefined if no results found", function () {
-          var
-            objectStore = new ObjectStore({
-              dbName: "testDb",
-              osName: "testOs"
-            }),
-            query = {
-              prop1: { $lt: 5 }
-            },
-            fakePromise = new testUtils.fakePromise();
-
-          sandbox.stub(ixdb, "get").returns(fakePromise);
+        it("calls ixdb.get with osName option", function () {
           objectStore.findOne(query);
+          expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
+        });
 
-          var thenCb = fakePromise.then.args[0][0];
+        it("calls ixdb.get with findMany option === false", function () {
+          objectStore.findOne(query);
+          expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", false);
+        });
 
-          expect(thenCb([])).to.eql(undefined);
+        it("calls ixdb.get with modified query", function () {
+          var modifiedQuery = _.chain(query)
+            .map(function (val, key) {
+              return ["$data." + key, val];
+            })
+            .object()
+            .value();
+
+          objectStore.findOne(query);
+          expect(ixdb.get.getCall(0).args[0].query).to.deep.eql(modifiedQuery);
+        });
+
+        it("resolves to data of first record found", function (done) {
+          objectStore.findOne(query).then(function (result) {
+            testUtils.captureExceptions(done, function () {
+              expect(result).to.be.an("object");
+              expect(result).to.have.property("prop1", 3);
+            });
+          });
+        });
+
+        it("resolves to undefined if no results found", function (done) {
+          ixdb.get.restore();
+          sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
+          objectStore.findOne(query).then(function (result) {
+            testUtils.captureExceptions(done, function () {
+              expect(result).to.be.an("undefined");
+            });
+          });
         });
       });
 
