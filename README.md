@@ -59,8 +59,6 @@ r.characters.insertOne({ name: "Dorothy", ownsPets: true, age: 17 })
     console.log("Dorothy's ID is" + id);
   });
 
-delete r;
-
 // ...
 
 var landOfOz = new Recollect("landOfOz");
