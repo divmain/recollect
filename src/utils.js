@@ -1,102 +1,81 @@
-define([
-  "lodash",
-  "./errors"
-], function (_, Errors) {
+import Errors from "./errors";
 
-  var
-    splitOn = /\./;
 
-  /**
-   * Splits keypath on non-escaped period.
-   *
-   * @param  {String} keypath  "Escapeable\\.period.delimited.keypath"
-   * @return {Array}           ["Escapeable.period", "delimited", "keypath"]
-   */
-  var getKeypathArray = function (keypath) {
-    var
-      kpArray = keypath.split(splitOn),
-      nodesToMerge = [];
+const KEYPATH_DELIM = ".";
+const ESCAPED_DELIM = "\\.";
 
-    if (kpArray.length === 1) { return kpArray; }
 
-    _.each(kpArray, function (node, index) {
-      if (node[node.length - 1] === "\\") { nodesToMerge.push(index); }
-    });
-    nodesToMerge.reverse();
+/**
+ * Splits keypath on non-escaped delimiter.
+ *
+ * @param  {String} keypath  "Escapeable\\.period.delimited.keypath"
+ *
+ * @return {Array}           ["Escapeable.period", "delimited", "keypath"]
+ */
+export function getKeypathArray (keypath) {
+  // "hello\\.how.are.you"
+  return keypath
+    // ["hello", "how.are.you"]
+    .split(ESCAPED_DELIM)
+    // [["hello"], ["how", "are", "you"]]
+    .map(segment => segment.split(KEYPATH_DELIM))
+    // ["hello.how", "are", "you"]
+    .reduce((combined, segmentArray) => {
+      return combined && combined.length && segmentArray.length ?
+        // if this is the second or greater segment
+        combined
+          // return everything but the last element of the combined array so far...
+          .slice(0, -1)
+          .concat(
+            // plus the combined array's last element joined witt the segment's first...
+            combined[combined.length - 1] + KEYPATH_DELIM + segmentArray[0],
+            // plus the rest of the segment...
+            segmentArray.slice(1)
+          )
+          // making sure to remove any empty strings at the end.
+          .filter(x => x) :
+        // but, if it is the first or only segment, just return that
+        segmentArray;
+    }, null);
+}
 
-    _.each(nodesToMerge, function (index) {
-      var removed;
-      if (index === kpArray.length - 1) { return; }
-      removed = kpArray.splice(index + 1, 1);
-      kpArray[index] = kpArray[index].slice(0, -1) + "." + removed;
-    });
+export function getDeepValue (object, keypathArray) {
+  let ref = object;
+  for (const key of keypathArray) {
+    ref = ref[key];
+    if (ref === void 0) { return undefined; }
+  }
+  return ref;
+}
 
-    return _.compact(kpArray);
-  };
+export function setDeepValue (object, keypathArray, value) {
+  const lastKey = keypathArray[keypathArray.length - 1];
+  const anscestors = keypathArray.slice(0, -1);
 
-  var getDeepValue = function (object, keypathArray) {
-    var keyAtNode,
-      ref = object;
-
-    for (var i = 0; i < keypathArray.length; i++) {
-      keyAtNode = keypathArray[i];
-      ref = ref[keyAtNode];
-      if (_.isUndefined(ref)) { return undefined; }
+  let ref = object;
+  for (const key of anscestors) {
+    if (ref[key] === void 0) {
+      ref[key] = {};
     }
+    ref = ref[key];
+  }
+  ref[lastKey] = value;
+}
 
-    return ref;
-  };
-
-  var setDeepValue = function (object, keypathArray, value) {
-    var keyAtNode,
-      ref = object;
-
-    for (var i = 0; i < keypathArray.length; i++) {
-      keyAtNode = keypathArray[i];
-
-      if (_.isUndefined(ref[keyAtNode])) {
-        ref[keyAtNode] = {};
-      }
-
-      if (i === keypathArray.length - 1) {
-        ref[keyAtNode] = value;
-      }
-      ref = ref[keyAtNode];
+export function normalizeOptions (options, requiredOptions, defaults) {
+  (requiredOptions || []).forEach(requiredOption => {
+    if (!(requiredOption in options)) {
+      throw new Errors.InvalidArgumentError(`${requiredOption} is a required option.`);
     }
-  };
+  });
+  return Object.assign({}, defaults, options);
+}
 
-  var normalizeOptions = function (options, requiredOptions, defaults) {
-    _.each(requiredOptions, function (requiredOption) {
-      if (!(requiredOption in options)) {
-        throw new Errors.InvalidArgumentError(requiredOption + " is a required option.");
-      }
-    });
-    return _.extend({}, defaults, options);
-  };
-
-  var inherit = function (Child, Parent) {
-    var hasOwn = Object.prototype.hasOwnProperty;
-
-    var Intermediate = function () {
-      this.constructor = Child;
-      this.constructor$ = Parent;
-      for (var prop in Parent.prototype) {
-        if (hasOwn.call(Parent.prototype, prop) && prop.slice(-1) !== "$") {
-          this[prop + "$"] = Parent.prototype[prop];
-        }
-      }
-    };
-
-    Intermediate.prototype = Parent.prototype;
-    Child.prototype = new Intermediate();
-    return Child.prototype;
-  };
-
-  return {
-    normalizeOptions: normalizeOptions,
-    inherit: inherit,
-    getKeypathArray: getKeypathArray,
-    getDeepValue: getDeepValue,
-    setDeepValue: setDeepValue
-  };
-});
+export function all (iterable, condition) {
+  for (const a of iterable) {
+    if (!condition(a)) {
+      return false;
+    }
+  }
+  return true;
+}

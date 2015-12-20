@@ -1,71 +1,72 @@
-define("recollect", [
-  "lodash",
-  "./errors",
-  "./ixdb",
-  "./utils"
-], function (_, Errors, ixdb, utils) {
+import _ from "lodash";
 
-  /**
-   * Return modified query, accounting for Recollect-specific storage format for
-   * records in IndexedDB object store.
-   *
-   * @param  {Object} query Query-literal.
-   *
-   * @return {Object}       Query-literal with modified keypaths.
-   */
-  var getIxdbQuery = function (query) {
-    return _.chain(query)
-      .map(function (val, keyPath) {
-        if (keyPath.indexOf("$meta.") !== 0) {
-          keyPath = "$data." + keyPath;
-        }
-        return [keyPath, val];
-      })
-      .object()
-      .value();
-  };
+import Errors from "./errors";
+import ixdb from "./ixdb";
+import utils from "./utils";
 
-  /**
-   * Given an object to store, return a corresponding object conforming to Recollect's
-   * storage format.
-   *
-   * @param  {Object} newRecord   Object to store
-   *
-   * @return {Object}             New Recollect record.
-   */
-  var getNewRecord = function (newRecord) {
-    return {
-      $data: newRecord,
-      $meta: {
-        created: Date.now(),
-        modified: null
-      }
-    };
-  };
+export Errors from "./errors";
 
-  /**
-   * Given properties with which to update Recollect records, return corresponding
-   * object to merge into existing records.
-   *
-   * @param  {Object} updatedProperties   Record updates.
-   *
-   * @return {Object}                     Object to merge into matching records.
-   */
-  var getRecordUpdate = function (updatedProperties) {
-    return {
-      $data: updatedProperties,
-      $meta: {
-        modified: Date.now()
-      }
+
+/**
+ * Return modified query, accounting for Recollect-specific storage format for
+ * records in IndexedDB object store.
+ *
+ * @param  {Object} query Query-literal.
+ *
+ * @return {Object}       Query-literal with modified keypaths.
+ */
+function getIxdbQuery (query) {
+  return _.chain(query)
+    .map((val, keyPath) => [
+      keyPath.indexOf("$meta.") !== 0 ? `$data.${keyPath}` : keyPath,
+      val
+    ])
+    .object()
+    .value();
+}
+
+/**
+ * Given an object to store, return a corresponding object conforming to Recollect's
+ * storage format.
+ *
+ * @param  {Object} newRecord   Object to store
+ *
+ * @return {Object}             New Recollect record.
+ */
+function getNewRecord (newRecord) {
+  return {
+    $data: newRecord,
+    $meta: {
+      created: Date.now(),
+      modified: null
     }
   };
+}
 
-  /**
-   * Constructor for ObjectStore.  Should not be instantiated directly.
-   */
-  var ObjectStore = function (options) {
-    _.extend(this, options || {});
+/**
+ * Given properties with which to update Recollect records, return corresponding
+ * object to merge into existing records.
+ *
+ * @param  {Object} updatedProperties   Record updates.
+ *
+ * @return {Object}                     Object to merge into matching records.
+ */
+function getRecordUpdate (updatedProperties) {
+  return {
+    $data: updatedProperties,
+    $meta: {
+      modified: Date.now()
+    }
   };
+}
+
+/**
+ * ObjectStore should not be instantiated directly.
+ */
+export class ObjectStore {
+  constructor (opts = {}) {
+    Object.assign(this, opts);
+  }
 
   /**
    * Given a query, resolves to an array of all matching objects in object store.
@@ -75,18 +76,14 @@ define("recollect", [
    * @return {Promise}       Resolves to array of matching objects on success, or
    *                         an emtry array if not matches are found.
    */
-  ObjectStore.prototype.find = function (query) {
+  find (query) {
     return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
       query: getIxdbQuery(query),
       findMany: true
-    }).then(function (records) {
-      return _.map(records, function (record) {
-        return record.$data;
-      });
-    });
-  };
+    }).then(records => records.map(record => record.$data));
+  }
 
   /**
    * Given a query, resolves to the first matching object in object store.
@@ -96,65 +93,57 @@ define("recollect", [
    * @return {Promise}       Resolves to the first matching object on success, or
    *                         undefined if no matches are found.
    */
-  ObjectStore.prototype.findOne = function (query) {
+  findOne (query) {
     return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
       query: getIxdbQuery(query),
       findMany: false
-    }).then(function (records) {
-      return records.length && records[0].$data || undefined;
-    });
-  };
+    }).then(records => records.length && records[0].$data || undefined);
+  }
 
   /**
    * Given a name of an indexed field and the value for that field, performs additional
    * filters using provided query, and resolves to an array of all matching objects.
    *
    * @param  {String} indexedFieldName  Name of field that has been indexed.
-   * @param           indexedValue      Value of field in object to find.
+   * @param  {Any}    indexedValue      Value of field in object to find.
    * @param  {Object} query             Query conforming to Query object literal format.
    *
    * @return {Promise}                  Resolves to array of matching objects on success, or
    *                                    an empty array if no matches are found.
    */
-  ObjectStore.prototype.findByIndex = function (indexedFieldName, indexedValue, query) {
+  findByIndex (indexedFieldName, indexedValue, query) {
     return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
       query: getIxdbQuery(query),
       findMany: true,
-      indexedFieldName: indexedFieldName,
-      indexedValue: indexedValue
-    }).then(function (records) {
-      return _.map(records, function (record) {
-        return record.$data;
-      });
-    });
-  };
+      indexedFieldName,
+      indexedValue
+    }).then(records => records.map(record => record.$data));
+  }
 
   /**
    * Given a name of an indexed field and the value for that field, performs additional
    * filters using provided query, and resolves to the first matching object.
    *
    * @param  {String} indexedFieldName  Name of field that has been indexed.
-   * @param           indexedValue      Value of field in object to find.
+   * @param  {Any}    indexedValue      Value of field in object to find.
    * @param  {Object} query             Query conforming to Query object literal format.
    *
    * @return {Promise}                  Resolves to object on success or undefined if not found.
    */
-  ObjectStore.prototype.findOneByIndex = function (indexedFieldName, indexedValue, query) {
+  findOneByIndex (indexedFieldName, indexedValue, query) {
     return ixdb.get({
       dbName: this.dbName,
       osName: this.osName,
       query: getIxdbQuery(query),
       findMany: false,
-      indexedFieldName: indexedFieldName,
-      indexedValue: indexedValue
-    }).then(function (records) {
-      return records.length && records[0].$data || undefined;
-    });
-  };
+      indexedFieldName,
+      indexedValue
+    }).then(records => records.length && records[0].$data || undefined);
+  }
 
   /**
    * Given an object, inserts object into the object store.
@@ -163,7 +152,7 @@ define("recollect", [
    *
    * @return {Promise}           Resolves to key of inserted object on success.
    */
-  ObjectStore.prototype.insertOne = function (newRecord) {
+  insertOne (newRecord) {
     if (!_.isObject(newRecord)) {
       throw new Errors.InvalidArgumentError("insertOne requires newRecord as argument");
     }
@@ -180,10 +169,8 @@ define("recollect", [
       dbName: this.dbName,
       osName: this.osName,
       records: [getNewRecord(newRecord)]
-    }).then(function (ids) {
-      return ids[0];
-    });
-  };
+    }).then(ids => ids[0]);
+  }
 
   /**
    * Given an array of objects, inserts each object into the object store.
@@ -192,44 +179,43 @@ define("recollect", [
    *
    * @return {Promise}           Resolves to array of keys of inserted objects.
    */
-  ObjectStore.prototype.insertMany = function (newRecords) {
+  insertMany (newRecords) {
     if (!_.isArray(newRecords) || newRecords.length < 1) {
       throw new Errors.InvalidArgumentError("newRecords must be an array");
     }
-    _.each(newRecords, function (record) {
-      // TODO: Use utils.getKeypathArray and utils.getDeepValue
+    for (const record of newRecords) {
       if (!_.isUndefined(record._id)) {
         throw new Errors.InvalidArgumentError("new records cannot contain `_id` property");
       }
-    });
+    }
 
     return ixdb.add({
       dbName: this.dbName,
       osName: this.osName,
       records: _.map(newRecords, getNewRecord)
     });
-  };
+  }
 
   /**
    * Given query, finds all matching objects in object store and merges new properties into
    * matching objects.
    *
-   * @param  {Object} options
+   * @param  {Object}  options  Object with at least "query" and "newProperties" props.
    *
-   * @return {Promise}         Resolves with no value on success.
+   * @return {Promise}          Resolves with no value on success.
    */
-  ObjectStore.prototype.update = function (options) {
+  update (options) {
     options = utils.normalizeOptions(options, ["query", "newProperties"], {
       dbName: this.dbName,
       osName: this.osName
     });
 
     options = _.extend({}, options, {
-      newProperties: getRecordUpdate(newProperties)
+      newProperties: getRecordUpdate(options.newProperties)
     });
 
     return ixdb.update(options);
-  };
+  }
 
   /**
    * Given a key path to an existing object in the object store, replaces
@@ -242,15 +228,15 @@ define("recollect", [
    *                             with ObjectNotFoundError if key does not
    *                             match existing object.
    */
-  ObjectStore.prototype.replace = function (key, newObject) {
+  replace (key, newObject) {
     return ixdb.replace({
       dbName: this.dbName,
       osName: this.osName,
-      key: key,
+      key,
       keyPath: this.keyPath,
       newObject: getNewRecord(newObject)
     });
-  };
+  }
 
   /**
    * Deletes object from store by key.
@@ -259,72 +245,70 @@ define("recollect", [
    *
    * @return {Promise}         Resolves with no value on success.
    */
-  ObjectStore.prototype.delete = function (key) {
+  delete (key) {
     return ixdb.del({
       dbName: this.dbName,
       osName: this.osName,
       keys: [key]
     });
-  };
+  }
 
   /**
    * Removes object store from database.
    *
    * @return {Promise}  Resolves with no value on success.
    */
-  ObjectStore.prototype.drop = function () {
-    var self = this;
+  drop () {
     return ixdb.deleteObjectStore({
       osName: this.osName,
       dbName: this.dbName
-    }).then(function () {
-      return ixdb.del({
-        dbName: self.dbName,
-        osName: "_config",
-        keys: [self.osName],
-      });
-    }).then(function () {
-      delete self._db[self.osName];
+    }).then(() => ixdb.del({
+      dbName: this.dbName,
+      osName: "_config",
+      keys: [this.osName]
+    })).then(() => {
+      delete this._db[this.osName];
     });
-  };
+  }
+}
 
-  /**
-   * Creates instance of ObjectStore, and attaches instance as property on
-   * parent Recollect instance.
-   *
-   * @param  {Object}    recollect  Parent recollect instance.
-   * @param  {IDXCursor} dsRecord   Cursor for record in `_config`
-   */
-  var initObjectStoreObject = function (recollect, dsRecord) {
-    var osName = dsRecord.osName;
+/**
+ * Creates instance of ObjectStore, and attaches instance as property on
+ * parent Recollect instance.
+ *
+ * @param   {Object}    recollect  Parent recollect instance.
+ * @param   {IDXCursor} dsRecord   Cursor for record in `_config`
+ *
+ * @returns {Undefined}            No return value.
+ */
+function initObjectStoreObject (recollect, dsRecord) {
+  const osName = dsRecord.osName;
 
-    if (osName === "_config") {
-      return;
-    }
-    if (!_.isUndefined(recollect[osName])) {
-      throw new Errors.InitializationError("Invalid object store name or Recollect instance " +
-        "already initialized.");
-    }
+  if (osName === "_config") { return; }
+  if (!_.isUndefined(recollect[osName])) {
+    throw new Errors.InitializationError(
+      "Invalid object store name or Recollect instance already initialized.");
+  }
 
-    recollect[osName] = new ObjectStore(_.extend({}, dsRecord, {
-      _db: recollect,
-      dbName: recollect.dbName
-    }));
-  };
+  recollect[osName] = new ObjectStore(_.extend({}, dsRecord, {
+    _db: recollect,
+    dbName: recollect.dbName
+  }));
+}
 
-  /**
-   * Constructor for Recollect object.  Provides an interface for interacting with
-   * IndexedDB databases and object stores.  Should be `initialize`d before use.
-   *
-   * @param {String} name  Name database (scoped to FQDN and port)
-   */
-  var Recollect = function (name) {
+/**
+ * Constructor for Recollect object.  Provides an interface for interacting with
+ * IndexedDB databases and object stores.  Should be `initialize`d before use.
+ *
+ * @param {String} name  Name database (scoped to FQDN and port)
+ */
+export default class Recollect {
+  constructor (name) {
     if (!name) {
       throw new Errors.InvalidArgumentError("You must provide a database name.");
     }
     this.dbName = name;
-    return this;
-  };
+  }
 
   /**
    * Iterates through database's `_config` object store.  For each record found
@@ -333,26 +317,24 @@ define("recollect", [
    * @return {Promise}  Resolves to Recollect instance after ObjectStore instances
    *                    have successfully been attached.
    */
-  Recollect.prototype.initialize = function () {
-    var self = this;
-
+  initialize () {
     return ixdb.createConfigIfMissing(this.dbName)
-      .then(function () {
-        return ixdb.get({
-          dbName: self.dbName,
-          osName: "_config",
-          query: null,
-          findMany: true
-        }).then(function (objectStoreRecords) {
-          _.each(objectStoreRecords, _.partial(initObjectStoreObject, self));
-          return self;
-        });
+      .then(() => ixdb.get({
+        dbName: this.dbName,
+        osName: "_config",
+        query: null,
+        findMany: true
+      }))
+      .then(objectStoreRecords => {
+        objectStoreRecords.forEach(dsRecord => initObjectStoreObject(this, dsRecord));
+        return this;
       });
-  };
+  }
 
   /**
    * Creates and configures new object store.
    *
+   * @param  {Object}  options                     Options.
    * @param  {String}  options.osName              Name of new object store.
    * @param  {Boolean} options.autoIncrement       If true, keys are automatically
    *                                               generated.
@@ -365,55 +347,44 @@ define("recollect", [
    *
    * @return {Promise}                             Resolves to new object store object.
    */
-  Recollect.prototype.createObjectStore = function (options) {
-    var self = this;
-
+  createObjectStore (options) {
     options = utils.normalizeOptions(options, ["osName"], {
       autoIncrement: true,
       keyPath: "_id",
       indexes: {}
     });
 
-    var created = Date.now();
+    const created = Date.now();
 
-    return ixdb.createObjectStore(_.extend({}, options, { dbName: this.dbName }))
-      .then(function (/* object store */) {
-        return ixdb.add({
-          dbName: self.dbName,
-          osName: "_config",
-          records: [{
-            osName: options.osName,
-            autoIncrement: options.autoIncrement,
-            keyPath: options.keyPath,
-            indexes: options.indexes,
-            created: created,
-            lastSynced: null
-          }]
-        });
-      })
-      .then(function () {
-        initObjectStoreObject(self, {
+    return ixdb.createObjectStore(Object.assign({}, options, { dbName: this.dbName }))
+      .then((/* object store */) => ixdb.add({
+        dbName: this.dbName,
+        osName: "_config",
+        records: [{
           osName: options.osName,
           autoIncrement: options.autoIncrement,
           keyPath: options.keyPath,
           indexes: options.indexes,
-          created: created,
+          created,
           lastSynced: null
-        });
-      });
-  };
+        }]
+      }))
+      .then(() => initObjectStoreObject(this, {
+        osName: options.osName,
+        autoIncrement: options.autoIncrement,
+        keyPath: options.keyPath,
+        indexes: options.indexes,
+        created,
+        lastSynced: null
+      }));
+  }
 
   /**
    * Drops database from IndexedDB.
    *
    * @return {Promise}    Resolves with no value on success.
    */
-  Recollect.prototype.drop = function () {
+  drop () {
     return ixdb.deleteDatabase(this.dbName);
-  };
-
-  Recollect.prototype.ObjectStore = ObjectStore;
-  Recollect.prototype.Errors = Errors;
-
-  return Recollect;
-});
+  }
+}
