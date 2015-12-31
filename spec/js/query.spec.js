@@ -1,9 +1,5 @@
-define([
-  "js/query"
-], function (
-  Query
-) {
-  describe("query", function () {
+import Query from "src/query";
+
+describe("query", function () {
    
-  });
 });

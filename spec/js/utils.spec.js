@@ -1,9 +1,5 @@
-define([
-  "js/utils"
-], function (
-  utils
-) {
-  describe("utils", function () {
-   
-  });
+import utils from "src/utils";
+
+describe("utils", () => {
+
 });

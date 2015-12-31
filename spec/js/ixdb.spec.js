@@ -1,9 +1,5 @@
-define([
-  "js/ixdb"
-], function (
-  ixdb
-) {
-  describe("ixdb", function () {
- 
-  });
+import ixdb from "src/ixdb";
+
+describe("ixdb", () => {
+
 });
