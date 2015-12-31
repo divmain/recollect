@@ -1,4 +1,6 @@
-import _ from "lodash";
+import isObject from "lodash/lang/isObject";
+import isArray from "lodash/lang/isArray";
+import isUndefined from "lodash/lang/isUndefined";
 
 import Errors from "./errors";
 import ixdb from "./ixdb";
@@ -16,13 +18,11 @@ export Errors from "./errors";
  * @return {Object}       Query-literal with modified keypaths.
  */
 function getIxdbQuery (query) {
-  return _.chain(query)
-    .map((val, keyPath) => [
-      keyPath.indexOf("$meta.") !== 0 ? `$data.${keyPath}` : keyPath,
-      val
-    ])
-    .object()
-    .value();
+  return Object.keys(query).reduce((modified, key) => {
+    const escapedKey = (keyPath.indexOf("$meta.") === 0) ? keyPath : `$data.${keyPath}`;
+    modified[escapedKey] = query[key];
+    return modified;
+  }, {});
 }
 
 /**
@@ -153,15 +153,15 @@ export class ObjectStore {
    * @return {Promise}           Resolves to key of inserted object on success.
    */
   insertOne (newRecord) {
-    if (!_.isObject(newRecord)) {
+    if (!isObject(newRecord)) {
       throw new Errors.InvalidArgumentError("insertOne requires newRecord as argument");
     }
     // TODO: Use utils.getKeypathArray and utils.getDeepValue
-    if (this.autoIncrement && !_.isUndefined(newRecord[this.keyPath])) {
+    if (this.autoIncrement && !isUndefined(newRecord[this.keyPath])) {
       throw new Errors.InvalidArgumentError("newRecord cannot contain keyPath property");
     }
     // TODO: Use utils.getKeypathArray and utils.getDeepValue
-    if (!this.autoIncrement && _.isUndefined(newRecord[this.keyPath])) {
+    if (!this.autoIncrement && isUndefined(newRecord[this.keyPath])) {
       throw new Errors.InvalidArgumentError("newRecord must contain keyPath property");
     }
 
@@ -180,11 +180,11 @@ export class ObjectStore {
    * @return {Promise}           Resolves to array of keys of inserted objects.
    */
   insertMany (newRecords) {
-    if (!_.isArray(newRecords) || newRecords.length < 1) {
+    if (!isArray(newRecords) || newRecords.length < 1) {
       throw new Errors.InvalidArgumentError("newRecords must be an array");
     }
     for (const record of newRecords) {
-      if (!_.isUndefined(record._id)) {
+      if (!isUndefined(record._id)) {
         throw new Errors.InvalidArgumentError("new records cannot contain `_id` property");
       }
     }
@@ -192,7 +192,7 @@ export class ObjectStore {
     return ixdb.add({
       dbName: this.dbName,
       osName: this.osName,
-      records: _.map(newRecords, getNewRecord)
+      records: newRecords.map(getNewRecord)
     });
   }
 
@@ -210,7 +210,7 @@ export class ObjectStore {
       osName: this.osName
     });
 
-    options = _.extend({}, options, {
+    options = Object.assign({}, options, {
       newProperties: getRecordUpdate(options.newProperties)
     });
 
@@ -285,12 +285,12 @@ function initObjectStoreObject (recollect, dsRecord) {
   const osName = dsRecord.osName;
 
   if (osName === "_config") { return; }
-  if (!_.isUndefined(recollect[osName])) {
+  if (!isUndefined(recollect[osName])) {
     throw new Errors.InitializationError(
       "Invalid object store name or Recollect instance already initialized.");
   }
 
-  recollect[osName] = new ObjectStore(_.extend({}, dsRecord, {
+  recollect[osName] = new ObjectStore(Object.assign({}, dsRecord, {
     _db: recollect,
     dbName: recollect.dbName
   }));
