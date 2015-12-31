@@ -2,9 +2,9 @@ import parial from "lodash/function/partial";
 import merge from "lodash/object/merge";
 
 import Promise from "./promise";
-import Errors from "./errors";
+import * as Errors from "./errors";
 import Query from "./query";
-import utils from "./utils";
+import * as utils from "./utils";
 
 
 const IndexedDB = window.indexedDB ||

@@ -1,5 +1,5 @@
 import { ObjectStore, default as Recollect } from "src/recollect";
-import ixdb from "src/ixdb";
+import * as ixdb from "src/ixdb";
 import Errors from "src/errors";
 import testUtils from "../test-utils";
 

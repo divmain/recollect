@@ -3,7 +3,7 @@ import isString from "lodash/lang/isString";
 import isObject from "lodash/lang/isObject";
 import isEqual from "lodash/internal/baseIsEqual";
 
-import utils from "./utils";
+import * as utils from "./utils";
 
 
 function isEqlRegex (objA, objB) {

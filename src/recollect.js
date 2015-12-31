@@ -2,11 +2,11 @@ import isObject from "lodash/lang/isObject";
 import isArray from "lodash/lang/isArray";
 import isUndefined from "lodash/lang/isUndefined";
 
-import Errors from "./errors";
-import ixdb from "./ixdb";
-import utils from "./utils";
+import * as Errors from "./errors";
+import * as ixdb from "./ixdb";
+import * as utils from "./utils";
 
-export Errors from "./errors";
+export * as Errors from "./errors";
 
 
 /**

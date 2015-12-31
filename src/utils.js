@@ -1,4 +1,4 @@
-import Errors from "./errors";
+import * as Errors from "./errors";
 
 
 const KEYPATH_DELIM = ".";
