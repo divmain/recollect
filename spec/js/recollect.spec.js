@@ -6,21 +6,16 @@ import Errors from "src/errors";
 import testUtils from "../test-utils";
 
 
-describe("js/recollect", function () {
+describe("js/recollect", () => {
   let sandbox;
-  beforeEach(function () {
-    sandbox = sinon.sandbox.create();
-  });
+  beforeEach(() => sandbox = sinon.sandbox.create());
+  afterEach(() => sandbox.restore());
 
-  afterEach(function () {
-    sandbox.restore();
-  });
-
-  describe("ObjectStore", function () {
-    describe("find", function () {
+  describe("ObjectStore", () => {
+    describe("find", () => {
       var objectStore, query, result;
 
-      beforeEach(function () {
+      beforeEach(() => {
         objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs"
@@ -51,22 +46,22 @@ describe("js/recollect", function () {
         sandbox.stub(ixdb, "get").returns(Promise.resolve(result));
       });
 
-      it("calls ixdb.get with dbName option", function () {
+      it("calls ixdb.get with dbName option", () => {
         objectStore.find(query);
         expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
       });
 
-      it("calls ixdb.get with osName option", function () {
+      it("calls ixdb.get with osName option", () => {
         objectStore.find(query);
         expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
       });
 
-      it("calls ixdb.get with findMany option === true", function () {
+      it("calls ixdb.get with findMany option === true", () => {
         objectStore.find(query);
         expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", true);
       });
 
-      it("calls ixdb.get with modified query", function () {
+      it("calls ixdb.get with modified query", () => {
         var modifiedQuery = _.chain(query)
           .map(function (val, key) {
             return ["$data." + key, val];
@@ -80,7 +75,7 @@ describe("js/recollect", function () {
 
       it("resolves to an array of record data", function (done) {
         objectStore.find(query).then(function (records) {
-          testUtils.captureExceptions(done, function () {
+          testUtils.captureExceptions(done, () => {
             expect(records).to.have.length(2);
             expect(records[0]).to.have.property("prop1", 3);
             expect(records[1]).to.have.property("prop1", 2);
@@ -89,10 +84,10 @@ describe("js/recollect", function () {
       });
     });
 
-    describe("findOne", function () {
+    describe("findOne", () => {
       var objectStore, query, result;
 
-      beforeEach(function () {
+      beforeEach(() => {
         objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs"
@@ -123,22 +118,22 @@ describe("js/recollect", function () {
         sandbox.stub(ixdb, "get").returns(Promise.resolve(result));
       });
 
-      it("calls ixdb.get with dbName option", function () {
+      it("calls ixdb.get with dbName option", () => {
         objectStore.findOne(query);
         expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
       });
 
-      it("calls ixdb.get with osName option", function () {
+      it("calls ixdb.get with osName option", () => {
         objectStore.findOne(query);
         expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
       });
 
-      it("calls ixdb.get with findMany option === false", function () {
+      it("calls ixdb.get with findMany option === false", () => {
         objectStore.findOne(query);
         expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", false);
       });
 
-      it("calls ixdb.get with modified query", function () {
+      it("calls ixdb.get with modified query", () => {
         var modifiedQuery = _.chain(query)
           .map(function (val, key) {
             return ["$data." + key, val];
@@ -152,7 +147,7 @@ describe("js/recollect", function () {
 
       it("resolves to data of first record found", function (done) {
         objectStore.findOne(query).then(function (result) {
-          testUtils.captureExceptions(done, function () {
+          testUtils.captureExceptions(done, () => {
             expect(result).to.be.an("object");
             expect(result).to.have.property("prop1", 3);
           });
@@ -163,15 +158,15 @@ describe("js/recollect", function () {
         ixdb.get.restore();
         sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
         objectStore.findOne(query).then(function (result) {
-          testUtils.captureExceptions(done, function () {
+          testUtils.captureExceptions(done, () => {
             expect(result).to.be.an("undefined");
           });
         });
       });
     });
 
-    describe("findByIndex", function () {
-      it("defers to ixdb.get, providing necessary options", function () {
+    describe("findByIndex", () => {
+      it("defers to ixdb.get, providing necessary options", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -195,8 +190,8 @@ describe("js/recollect", function () {
       });
     });
 
-    describe("findOneByIndex", function () {
-      it("defers to ixdb.get, providing necessary options", function () {
+    describe("findOneByIndex", () => {
+      it("defers to ixdb.get, providing necessary options", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -219,7 +214,7 @@ describe("js/recollect", function () {
         expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
       });
 
-      it("resolves to the first result found", function () {
+      it("resolves to the first result found", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -238,7 +233,7 @@ describe("js/recollect", function () {
         expect(thenCb([3, 5])).to.eql(3);
       });
 
-      it("resolves to undefined if no results found", function () {
+      it("resolves to undefined if no results found", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -258,8 +253,8 @@ describe("js/recollect", function () {
       });
     });
 
-    describe("insertOne", function () {
-      it("throws an error if new record not provided", function () {
+    describe("insertOne", () => {
+      it("throws an error if new record not provided", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -268,11 +263,11 @@ describe("js/recollect", function () {
           fakePromise = new testUtils.fakePromise();
 
         sandbox.stub(ixdb, "add").returns(fakePromise);
-        expect(function () { objectStore.insertOne(); })
+        expect(() => { objectStore.insertOne(); })
           .to.throw(Errors.InvalidArgumentError);
       });
 
-      it("throws an error if value present at keypath when not allowed", function () {
+      it("throws an error if value present at keypath when not allowed", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -287,11 +282,11 @@ describe("js/recollect", function () {
           fakePromise = new testUtils.fakePromise();
 
         sandbox.stub(ixdb, "add").returns(fakePromise);
-        expect(function () { objectStore.insertOne(newRecord); })
+        expect(() => { objectStore.insertOne(newRecord); })
           .to.throw(Errors.InvalidArgumentError);
       });
 
-      it("throws an error if no value present at keypath when required", function () {
+      it("throws an error if no value present at keypath when required", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -305,11 +300,11 @@ describe("js/recollect", function () {
           fakePromise = new testUtils.fakePromise();
 
         sandbox.stub(ixdb, "add").returns(fakePromise);
-        expect(function () { objectStore.insertOne(newRecord); })
+        expect(() => { objectStore.insertOne(newRecord); })
           .to.throw(Errors.InvalidArgumentError);
       });
 
-      it("defers to ixdb.add, providing necessary options", function () {
+      it("defers to ixdb.add, providing necessary options", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -330,7 +325,7 @@ describe("js/recollect", function () {
         expect(ixdb.add.args[0][0].records).to.eql([ newRecord ]);
       });
 
-      it("resolves to the id of the new database entry", function () {
+      it("resolves to the id of the new database entry", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -352,8 +347,8 @@ describe("js/recollect", function () {
       });
     });
 
-    describe("insertMany", function () {
-      it("throws an error if array of new records is not provided", function () {
+    describe("insertMany", () => {
+      it("throws an error if array of new records is not provided", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -362,14 +357,14 @@ describe("js/recollect", function () {
           fakePromise = new testUtils.fakePromise();
 
         sandbox.stub(ixdb, "add").returns(fakePromise);
-        expect(function () { objectStore.insertMany(); })
+        expect(() => { objectStore.insertMany(); })
           .to.throw(Errors.InvalidArgumentError);
 
-        expect(function () { objectStore.insertMany([]); })
+        expect(() => { objectStore.insertMany([]); })
           .to.throw(Errors.InvalidArgumentError);
       });
 
-      it("throws an error if value present at keypath when not allowed", function () {
+      it("throws an error if value present at keypath when not allowed", () => {
         var
           objectStore = new ObjectStore({
             dbName: "testDb",
@@ -378,7 +373,7 @@ describe("js/recollect", function () {
             keyPath: "_id"
           }),
           fakePromise = new testUtils.fakePromise(),
-          testFn = function () {
+          testFn = () => {
             objectStore.insertMany([{
               thing: "value"
             }, {
@@ -399,21 +394,21 @@ describe("js/recollect", function () {
       it("resolves to the ids of the new database entries");
     });
 
-    describe("update", function () {
+    describe("update", () => {
       it("throws an error if `query` option not provided");
 
       it("throws an error if `newProperties` option new provided");
     });
 
-    describe("replace", function () {
+    describe("replace", () => {
       it("defers to ixdb.replace");
     });
 
-    describe("delete", function () {
+    describe("delete", () => {
       it("defers to ixdb.del");
     });
 
-    describe("drop", function () {
+    describe("drop", () => {
       it("defers to ixdb.deleteObjectStore, providing necessary options");
 
       it("removes the relevant entry from _config object store");
@@ -422,10 +417,10 @@ describe("js/recollect", function () {
     });
   });
 
-  describe("Recollect", function () {
+  describe("Recollect", () => {
     it("throws an error if dbName is not supplied");
 
-    describe("createObjectStore", function () {
+    describe("createObjectStore", () => {
       it("creates IndexedDB object store");
 
       it("creates an entry in _config object store");
@@ -433,7 +428,7 @@ describe("js/recollect", function () {
       it("create new instance of ObjectStore");
     });
 
-    describe("initialize", function () {
+    describe("initialize", () => {
       it("creates _config if missing");
 
       it("instantiates new instances of ObjectStore for each entry in _config");
