@@ -21,6 +21,5 @@ module.exports = {
   },
   plugins: [
     new webpack.optimize.DedupePlugin(),
-    new webpack.SourceMapDevToolPlugin("[file].map")
   ]
 };

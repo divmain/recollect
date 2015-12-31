@@ -8,6 +8,7 @@ module.exports = _.merge({}, baseConfig, {
     filename: "recollect.min.js"
   },
   plugins: [
+    new webpack.SourceMapDevToolPlugin("[file].map"),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         warnings: false

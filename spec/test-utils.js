@@ -1,19 +1,10 @@
-define([], function () {
-  return {
-    fakePromise: function () {
-      return {
-        then: sinon.stub(),
-        catch: sinon.stub(),
-        finally: sinon.stub
-      };
-    },
-    captureExceptions: function (cb, fn) {
-      try {
-        fn();
-        cb();
-      } catch (error) {
-        cb(error);
-      }
+export function captureExceptions (done, fn) {
+  return function () {
+    try {
+      fn();
+      done();
+    } catch (error) {
+      done(error);
     }
   };
-});
+}
