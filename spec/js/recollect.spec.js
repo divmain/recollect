@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import { ObjectStore, default as Recollect } from "src/recollect";
 import * as ixdb from "src/ixdb";
 import Errors from "src/errors";
