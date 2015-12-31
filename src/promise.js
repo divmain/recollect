@@ -1,5 +1,5 @@
 // Rely on Babel's ES6 Promise implementation here.
-export default const P = Promise;
+const P = Promise;
 P.prototype.finally = function (cb) {
   return this
     .then(
@@ -7,3 +7,4 @@ P.prototype.finally = function (cb) {
       rejected => Promise.resolve(cb()).then(() => Promise.reject(rejected))
     );
 };
+export default P;

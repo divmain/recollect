@@ -14,7 +14,7 @@ const IndexedDB = window.indexedDB ||
   window.msIndexedDB;
 const IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
 
-if (IndexedDB === void 0)) {
+if (IndexedDB === void 0) {
   throw new Errors.IndexedDbNotFound();
 }
 
@@ -202,7 +202,6 @@ export function update (options) {
   const query = new Query(options.query);
 
   return withDatabase(options.dbName, db => {
-    var
     const transaction = db.transaction([options.osName], "readwrite");
     const store = transaction.objectStore(options.osName);
     const cursor = getCursor(store);
