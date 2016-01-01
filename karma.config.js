@@ -66,8 +66,7 @@ module.exports = function (config) {
     // - Safari (karma-safari-launcher)
     // - PhantomJS (karma-phantomjs-launcher)
     // - IE (karma-ie-launcher)
-    // browsers: ["PhantomJS", "Chrome", "Firefox", "Safari"],
-    browsers: ["Chrome"],
+    browsers: ["Chrome", "Firefox", "Safari"],
 
     plugins: [
       require("karma-mocha"),

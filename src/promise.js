@@ -1,5 +1,6 @@
-// Rely on Babel's ES6 Promise implementation here.
-const P = Promise;
+// Rely on Babel's ES6 Promise polyfill implementation here.
+const P = require("core-js/es6/promise");
+
 P.prototype.finally = function (cb) {
   return this
     .then(
