@@ -2,18 +2,17 @@ import _ from "lodash";
 
 import { ObjectStore, default as Recollect } from "src/recollect";
 import * as ixdb from "src/ixdb";
-import Errors from "src/errors";
-import testUtils from "../test-utils";
+import * as Errors from "src/errors";
 
 
-describe("js/recollect", () => {
+describe("src/recollect", () => {
   let sandbox;
   beforeEach(() => sandbox = sinon.sandbox.create());
   afterEach(() => sandbox.restore());
 
   describe("ObjectStore", () => {
     describe("find", () => {
-      var objectStore, query, result;
+      let objectStore, query, result;
 
       beforeEach(() => {
         objectStore = new ObjectStore({
@@ -46,46 +45,63 @@ describe("js/recollect", () => {
         sandbox.stub(ixdb, "get").returns(Promise.resolve(result));
       });
 
-      it("calls ixdb.get with dbName option", () => {
-        objectStore.find(query);
-        expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
+      it("calls ixdb.get with dbName option", done => {
+        objectStore.find(query)
+          .then(() => {
+            expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
+            done();
+          })
+          .catch(done);
       });
 
-      it("calls ixdb.get with osName option", () => {
-        objectStore.find(query);
-        expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
+      it("calls ixdb.get with osName option", done => {
+        objectStore.find(query)
+          .then(() => {
+            expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
+            done();
+          })
+          .catch(done);
       });
 
-      it("calls ixdb.get with findMany option === true", () => {
-        objectStore.find(query);
-        expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", true);
+      it("calls ixdb.get with findMany option === true", done => {
+        objectStore.find(query)
+          .then(() => {
+            expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", true);
+            done();
+          })
+          .catch(done);;
       });
 
-      it("calls ixdb.get with modified query", () => {
-        var modifiedQuery = _.chain(query)
+      it("calls ixdb.get with modified query", done => {
+        const modifiedQuery = _.chain(query)
           .map(function (val, key) {
             return ["$data." + key, val];
           })
           .object()
           .value();
 
-        objectStore.find(query);
-        expect(ixdb.get.getCall(0).args[0].query).to.deep.eql(modifiedQuery);
+        objectStore.find(query)
+          .then(() => {
+            expect(ixdb.get.getCall(0).args[0].query).to.deep.eql(modifiedQuery);
+            done();
+          })
+          .catch(done);
       });
 
-      it("resolves to an array of record data", function (done) {
-        objectStore.find(query).then(function (records) {
-          testUtils.captureExceptions(done, () => {
+      it("resolves to an array of record data", done => {
+        objectStore.find(query)
+          .then(records => {
             expect(records).to.have.length(2);
             expect(records[0]).to.have.property("prop1", 3);
             expect(records[1]).to.have.property("prop1", 2);
-          });
-        });
+            done();
+          })
+          .catch(done);;
       });
     });
 
     describe("findOne", () => {
-      var objectStore, query, result;
+      let objectStore, query, result;
 
       beforeEach(() => {
         objectStore = new ObjectStore({
@@ -118,273 +134,313 @@ describe("js/recollect", () => {
         sandbox.stub(ixdb, "get").returns(Promise.resolve(result));
       });
 
-      it("calls ixdb.get with dbName option", () => {
-        objectStore.findOne(query);
-        expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
+      it("calls ixdb.get with dbName option", done => {
+        objectStore.findOne(query)
+          .then(() => {
+            expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
+            done();
+          })
+          .catch(done);
       });
 
-      it("calls ixdb.get with osName option", () => {
-        objectStore.findOne(query);
-        expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
+      it("calls ixdb.get with osName option", done => {
+        objectStore.findOne(query)
+          .then(() => {
+            expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
+            done();
+          })
+          .catch(done);
       });
 
-      it("calls ixdb.get with findMany option === false", () => {
-        objectStore.findOne(query);
-        expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", false);
+      it("calls ixdb.get with findMany option === false", done => {
+        objectStore.findOne(query)
+          .then(() => {
+            expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", false);
+            done();
+          })
+          .catch(done);
       });
 
-      it("calls ixdb.get with modified query", () => {
-        var modifiedQuery = _.chain(query)
+      it("calls ixdb.get with modified query", done => {
+        const modifiedQuery = _.chain(query)
           .map(function (val, key) {
             return ["$data." + key, val];
           })
           .object()
           .value();
 
-        objectStore.findOne(query);
-        expect(ixdb.get.getCall(0).args[0].query).to.deep.eql(modifiedQuery);
+        objectStore.findOne(query)
+          .then(() => {
+            expect(ixdb.get.getCall(0).args[0].query).to.deep.eql(modifiedQuery);
+            done();
+          })
+          .catch(done);
       });
 
-      it("resolves to data of first record found", function (done) {
-        objectStore.findOne(query).then(function (result) {
-          testUtils.captureExceptions(done, () => {
+      it("resolves to data of first record found", done => {
+        objectStore.findOne(query)
+          .then(result => {
             expect(result).to.be.an("object");
             expect(result).to.have.property("prop1", 3);
-          });
-        });
+            done();
+          })
+          .catch(done);
       });
 
-      it("resolves to undefined if no results found", function (done) {
+      it("resolves to undefined if no results found", done => {
         ixdb.get.restore();
         sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
-        objectStore.findOne(query).then(function (result) {
-          testUtils.captureExceptions(done, () => {
-            expect(result).to.be.an("undefined");
-          });
-        });
+
+        objectStore.findOne(query)
+          .then(result => {
+            expect(result).to.be.unedfined;
+            done();
+          })
+          .catch(done);
       });
     });
 
     describe("findByIndex", () => {
-      it("defers to ixdb.get, providing necessary options", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs"
-          }),
-          query = {
-            prop1: { $lt: 5 }
-          };
+      it("defers to ixdb.get, providing necessary options", done => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs"
+        });
+        const query = {
+          prop1: { $lt: 5 }
+        };
+        const innerQuery = {
+          "$data.prop1": { $lt: 5 }
+        };
 
-        sandbox.stub(ixdb, "get");
+        sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
 
-        objectStore.findByIndex("fieldName", "fieldValue", query);
-
-        expect(ixdb.get).to.have.been.calledOnce;
-        expect(ixdb.get.args[0][0]).to.have.property("dbName", "testDb");
-        expect(ixdb.get.args[0][0]).to.have.property("osName", "testOs");
-        expect(ixdb.get.args[0][0]).to.have.property("findMany", true);
-        expect(ixdb.get.args[0][0]).to.have.property("query", query);
-        expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "fieldName");
-        expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
+        objectStore.findByIndex("fieldName", "fieldValue", query)
+          .then(() => {
+            expect(ixdb.get).to.have.been.calledOnce;
+            expect(ixdb.get.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.get.args[0][0]).to.have.property("osName", "testOs");
+            expect(ixdb.get.args[0][0]).to.have.property("findMany", true);
+            expect(ixdb.get.args[0][0]).to.have.property("query").and
+              .to.have.property("$data.prop1").and
+              .to.have.property("$lt", 5);
+            expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "fieldName");
+            expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
+            done();
+          })
+          .catch(done);
       });
     });
 
     describe("findOneByIndex", () => {
-      it("defers to ixdb.get, providing necessary options", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs"
-          }),
-          query = {
-            prop1: { $lt: 5 }
-          };
+      it("defers to ixdb.get, providing necessary options", done => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs"
+        });
+        const query = {
+          prop1: { $lt: 5 }
+        };
 
-        sandbox.stub(ixdb, "get").returns(new testUtils.fakePromise());
+        sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
 
-        objectStore.findOneByIndex("fieldName", "fieldValue", query);
-
-        expect(ixdb.get).to.have.been.calledOnce;
-        expect(ixdb.get.args[0][0]).to.have.property("dbName", "testDb");
-        expect(ixdb.get.args[0][0]).to.have.property("osName", "testOs");
-        expect(ixdb.get.args[0][0]).to.have.property("findMany", false);
-        expect(ixdb.get.args[0][0]).to.have.property("query", query);
-        expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "fieldName");
-        expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
+        objectStore.findOneByIndex("fieldName", "fieldValue", query)
+          .then(() => {
+            expect(ixdb.get).to.have.been.calledOnce;
+            expect(ixdb.get.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.get.args[0][0]).to.have.property("osName", "testOs");
+            expect(ixdb.get.args[0][0]).to.have.property("findMany", false);
+            expect(ixdb.get.args[0][0]).to.have.property("query").and
+              .to.have.property("$data.prop1").and
+              .to.have.property("$lt", 5);
+            expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "fieldName");
+            expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
+            done();
+          })
+          .catch(done);
       });
 
-      it("resolves to the first result found", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs"
-          }),
-          query = {
-            prop1: { $lt: 5 }
-          },
-          fakePromise = new testUtils.fakePromise();
+      it("resolves to the first result found", done => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs"
+        });
+        const query = {
+          prop1: { $lt: 5 }
+        };
+        const ixdbGetResults = [{
+          $data: { some: "data" }
+        }, {
+          $data: { some: "other data" }
+        }];
 
-        sandbox.stub(ixdb, "get").returns(fakePromise);
-        objectStore.findOneByIndex(query);
+        sandbox.stub(ixdb, "get").returns(Promise.resolve(ixdbGetResults));
 
-        var thenCb = fakePromise.then.args[0][0];
+        objectStore.findOneByIndex("fieldName", "fieldValue", query)
+          .then(result => {
+            expect(result).to.equal(ixdbGetResults[0].$data);
+            done();
+          })
+          .catch(done);
 
-        expect(thenCb([3, 5])).to.eql(3);
       });
 
-      it("resolves to undefined if no results found", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs"
-          }),
-          query = {
-            prop1: { $lt: 5 }
-          },
-          fakePromise = new testUtils.fakePromise();
+      it("resolves to undefined if no results found", done => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs"
+        });
+        const query = {
+          prop1: { $lt: 5 }
+        };
 
-        sandbox.stub(ixdb, "get").returns(fakePromise);
-        objectStore.findOneByIndex(query);
+        sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
 
-        var thenCb = fakePromise.then.args[0][0];
-
-        expect(thenCb([])).to.eql(undefined);
+        objectStore.findOneByIndex("fieldName", "fieldValue", query)
+          .then(result => {
+            expect(result).to.be.undefined;
+            done();
+          })
+          .catch(done);
       });
     });
 
     describe("insertOne", () => {
       it("throws an error if new record not provided", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs"
-          }),
-          fakePromise = new testUtils.fakePromise();
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs"
+        });
 
-        sandbox.stub(ixdb, "add").returns(fakePromise);
-        expect(() => { objectStore.insertOne(); })
+        sandbox.stub(ixdb, "add").returns(null);
+
+        expect(() => objectStore.insertOne())
           .to.throw(Errors.InvalidArgumentError);
       });
 
       it("throws an error if value present at keypath when not allowed", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs",
-            autoIncrement: true,
-            keyPath: "_id"
-          }),
-          newRecord = {
-            some: "data",
-            _id: 5
-          },
-          fakePromise = new testUtils.fakePromise();
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+        const newRecord = {
+          some: "data",
+          _id: 5
+        };
 
-        sandbox.stub(ixdb, "add").returns(fakePromise);
-        expect(() => { objectStore.insertOne(newRecord); })
+        sandbox.stub(ixdb, "add").returns(null);
+
+        expect(() => objectStore.insertOne(newRecord))
           .to.throw(Errors.InvalidArgumentError);
       });
 
       it("throws an error if no value present at keypath when required", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs",
-            autoIncrement: false,
-            keyPath: "_id"
-          }),
-          newRecord = {
-            some: "data"
-          },
-          fakePromise = new testUtils.fakePromise();
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: false,
+          keyPath: "_id"
+        });
+        const newRecord = {
+          some: "data"
+        };
 
-        sandbox.stub(ixdb, "add").returns(fakePromise);
-        expect(() => { objectStore.insertOne(newRecord); })
+        sandbox.stub(ixdb, "add").returns(null);
+
+        expect(() => objectStore.insertOne(newRecord))
           .to.throw(Errors.InvalidArgumentError);
       });
 
-      it("defers to ixdb.add, providing necessary options", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs",
-            autoIncrement: true,
-            keyPath: "_id"
-          }),
-          newRecord = {
-            some: "data"
-          },
-          fakePromise = new testUtils.fakePromise();
+      it("defers to ixdb.add, providing necessary options", done => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+        const newRecord = {
+          some: "data"
+        };
 
-        sandbox.stub(ixdb, "add").returns(fakePromise);
-        objectStore.insertOne(newRecord);
+        sandbox.stub(ixdb, "add").returns(Promise.resolve([123]));
+        sandbox.stub(Date, "now").returns(1451606558471);
 
-        expect(ixdb.add.args[0][0]).to.have.property("dbName", "testDb");
-        expect(ixdb.add.args[0][0]).to.have.property("osName", "testOs");
-        expect(ixdb.add.args[0][0].records).to.eql([ newRecord ]);
+        objectStore.insertOne(newRecord)
+          .then(result => {
+            expect(ixdb.add.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.add.args[0][0]).to.have.property("osName", "testOs");
+
+            expect(ixdb.add.args[0][0]).to.have.property("records");
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].$data.some", "data");
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].$meta.created", 1451606558471);
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].$meta.modified", null);
+
+            done();
+          })
+          .catch(done);
       });
 
-      it("resolves to the id of the new database entry", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs",
-            autoIncrement: true,
-            keyPath: "_id"
-          }),
-          newRecord = {
-            some: "data"
-          },
-          fakePromise = new testUtils.fakePromise();
+      it("resolves to the id of the new database entry", done => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+        const newRecord = {
+          some: "data"
+        };
 
-        sandbox.stub(ixdb, "add").returns(fakePromise);
-        objectStore.insertOne(newRecord);
-
-        var thenCb = fakePromise.then.args[0][0];
-
-        expect(thenCb([20, 30])).to.eql(20);
+        sandbox.stub(ixdb, "add").returns(Promise.resolve([123]));
+        objectStore.insertOne(newRecord)
+          .then(recordId => {
+            expect(recordId).to.equal(123);
+            done()
+          })
+          .catch(done);
       });
     });
 
     describe("insertMany", () => {
       it("throws an error if array of new records is not provided", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs"
-          }),
-          fakePromise = new testUtils.fakePromise();
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs"
+        });
 
-        sandbox.stub(ixdb, "add").returns(fakePromise);
-        expect(() => { objectStore.insertMany(); })
+        expect(() => objectStore.insertMany())
           .to.throw(Errors.InvalidArgumentError);
 
-        expect(() => { objectStore.insertMany([]); })
+        expect(() => objectStore.insertMany([]))
+          .to.throw(Errors.InvalidArgumentError);
+
+        expect(() => objectStore.insertMany("bob"))
+          .to.throw(Errors.InvalidArgumentError);
+
+        expect(() => objectStore.insertMany({ my: "object" }))
           .to.throw(Errors.InvalidArgumentError);
       });
 
       it("throws an error if value present at keypath when not allowed", () => {
-        var
-          objectStore = new ObjectStore({
-            dbName: "testDb",
-            osName: "testOs",
-            autoIncrement: true,
-            keyPath: "_id"
-          }),
-          fakePromise = new testUtils.fakePromise(),
-          testFn = () => {
-            objectStore.insertMany([{
-              thing: "value"
-            }, {
-              thing: "otherValue",
-              _id: 5
-            }]);
-          };
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
 
-        sandbox.stub(ixdb, "add").returns(fakePromise);
-
-        
+        expect(() => objectStore.insertMany([{
+          ok: "object"
+        }, {
+          bad: "object",
+          _id: "this isn't allowed"
+        }]))
+          .to.throw(Errors.InvalidArgumentError);
       });
 
       it("throws an error if no value presetn at keypath when required");

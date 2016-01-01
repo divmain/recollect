@@ -3,7 +3,27 @@ var path = require("path");
 var _ = require("lodash");
 
 var webpackConfig = require("./webpack.config.dev");
-webpackConfig = _.extend({}, webpackConfig);
+
+webpackConfig = _.merge({}, webpackConfig, {
+  devtool: 'inline-source-map',
+  // These changes are necessary to make Sinon play nice in the Webpack
+  // environment.  Can be removed with the release of Sinon v2.0.
+  loaders: [{
+    test: /sinon\.js$/, loader: "imports?define=>false"
+  }],
+  module: { noParse: [ /sinon\.js$/ ] }  
+});
+
+webpackConfig.module.loaders = [{
+  test: /\.js$/,
+  exclude: [ /node_modules/ ],
+  loader: "babel-loader",
+  query: {
+    presets: ["es2015", "stage-0"],
+    // plugins: ["babel-plugin-rewire"]
+  }
+}];
+
 delete webpackConfig.entry;
 
 
