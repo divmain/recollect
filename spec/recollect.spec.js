@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-import { ObjectStore, default as Recollect } from "src/recollect";
+import { ObjectStore/*, default as Recollect*/ } from "src/recollect";
 import * as ixdb from "src/ixdb";
 import * as Errors from "src/errors";
 
@@ -12,7 +12,9 @@ describe("src/recollect", () => {
 
   describe("ObjectStore", () => {
     describe("find", () => {
-      let objectStore, query, result;
+      let objectStore;
+      let query;
+      let result;
 
       beforeEach(() => {
         objectStore = new ObjectStore({
@@ -69,14 +71,12 @@ describe("src/recollect", () => {
             expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", true);
             done();
           })
-          .catch(done);;
+          .catch(done);
       });
 
       it("calls ixdb.get with modified query", done => {
         const modifiedQuery = _.chain(query)
-          .map(function (val, key) {
-            return ["$data." + key, val];
-          })
+          .map((val, key) => [`$data.${key}`, val])
           .object()
           .value();
 
@@ -96,12 +96,15 @@ describe("src/recollect", () => {
             expect(records[1]).to.have.property("prop1", 2);
             done();
           })
-          .catch(done);;
+          .catch(done);
       });
     });
 
     describe("findOne", () => {
-      let objectStore, query, result;
+      let objectStore;
+      const query = {
+        prop1: { $lt: 5 }
+      };
 
       beforeEach(() => {
         objectStore = new ObjectStore({
@@ -109,11 +112,7 @@ describe("src/recollect", () => {
           osName: "testOs"
         });
 
-        query = {
-          prop1: { $lt: 5 }
-        };
-
-        result = [{
+        const result = [{
           $data: {
             prop1: 3
           },
@@ -163,9 +162,7 @@ describe("src/recollect", () => {
 
       it("calls ixdb.get with modified query", done => {
         const modifiedQuery = _.chain(query)
-          .map(function (val, key) {
-            return ["$data." + key, val];
-          })
+          .map((val, key) => [`$data.${key}`, val])
           .object()
           .value();
 
@@ -193,7 +190,7 @@ describe("src/recollect", () => {
 
         objectStore.findOne(query)
           .then(result => {
-            expect(result).to.be.unedfined;
+            expect(result).to.be.undefined;
             done();
           })
           .catch(done);
@@ -208,9 +205,6 @@ describe("src/recollect", () => {
         });
         const query = {
           prop1: { $lt: 5 }
-        };
-        const innerQuery = {
-          "$data.prop1": { $lt: 5 }
         };
 
         sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
@@ -368,7 +362,7 @@ describe("src/recollect", () => {
         sandbox.stub(Date, "now").returns(1451606558471);
 
         objectStore.insertOne(newRecord)
-          .then(result => {
+          .then(() => {
             expect(ixdb.add.args[0][0]).to.have.property("dbName", "testDb");
             expect(ixdb.add.args[0][0]).to.have.property("osName", "testOs");
 
@@ -400,7 +394,7 @@ describe("src/recollect", () => {
         objectStore.insertOne(newRecord)
           .then(recordId => {
             expect(recordId).to.equal(123);
-            done()
+            done();
           })
           .catch(done);
       });

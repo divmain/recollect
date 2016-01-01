@@ -19,7 +19,7 @@ export * as Errors from "./errors";
  */
 function getIxdbQuery (query) {
   return Object.keys(query).reduce((modified, keyPath) => {
-    const escapedKey = (keyPath.indexOf("$meta.") === 0) ? keyPath : `$data.${keyPath}`;
+    const escapedKey = keyPath.indexOf("$meta.") === 0 ? keyPath : `$data.${keyPath}`;
     modified[escapedKey] = query[keyPath];
     return modified;
   }, {});

@@ -6,6 +6,8 @@
   "scripts": {
     "build": "webpack --config ./webpack.config.prod.js",
     "build-dev": "webpack --config ./webpack.config.dev.js",
+    "check-local": "npm run lint && npm run test-local",
+    "lint": "eslint ./src ./spec",
     "test-local": "karma start ./karma.config.js --browsers Chrome,Firefox,Safari"
   },
   "repository": {

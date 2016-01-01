@@ -1,5 +1,5 @@
-import Query from "src/query";
+// import Query from "src/query";
 
-describe("query", function () {
-   
+describe("query", () => {
+
 });

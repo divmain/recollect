@@ -16,33 +16,33 @@ function isEqlRegex (objA, objB) {
 }
 
 const operators = {
-  $eq(deepValue, referenceValue) {
+  $eq (deepValue, referenceValue) {
     return isEqlRegex(deepValue, referenceValue) || isEqual(deepValue, referenceValue);
   },
-  $gt(deepValue, referenceValue) {
+  $gt (deepValue, referenceValue) {
     return deepValue > referenceValue;
   },
-  $lt(deepValue, referenceValue) {
+  $lt (deepValue, referenceValue) {
     return deepValue < referenceValue;
   },
-  $gte(deepValue, referenceValue) {
+  $gte (deepValue, referenceValue) {
     return deepValue >= referenceValue;
   },
-  $lte(deepValue, referenceValue) {
+  $lte (deepValue, referenceValue) {
     return deepValue <= referenceValue;
   },
-  $neq(deepValue, referenceValue) {
+  $neq (deepValue, referenceValue) {
     return deepValue !== referenceValue;
   },
-  $contains(deepValue, referenceValue) {
+  $contains (deepValue, referenceValue) {
     return isString(deepValue) &&
       isString(referenceValue) &&
       deepValue.indexOf(referenceValue) > 0;
   },
-  $regex(deepValue, regex) {
+  $regex (deepValue, regex) {
     return regex.test(deepValue);
   },
-  $fn(deepValue, testFn) {
+  $fn (deepValue, testFn) {
     let isMatch = false;
     try {
       isMatch = testFn(deepValue);
@@ -51,7 +51,7 @@ const operators = {
     }
     return isMatch;
   },
-  $fnUnsafe(deepValue, testFn) {
+  $fnUnsafe (deepValue, testFn) {
     return testFn(deepValue);
   }
 };
@@ -85,7 +85,7 @@ export default function query (queryLiteral) {
 
   // TODO: refactor to remove `isMatch` object wrapper - just return `isMatch` itself.
   return {
-    isMatch(obj) {
+    isMatch (obj) {
       return utils.all(conditions, condition => condition(obj));
     }
   };

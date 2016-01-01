@@ -1,4 +1,6 @@
-import parial from "lodash/function/partial";
+/* global window */
+
+import partial from "lodash/function/partial";
 import merge from "lodash/object/merge";
 
 import Promise from "./promise";
@@ -40,7 +42,7 @@ function accumulateResults (records, query, ev) {
     records.push(cursor.value);
   }
   cursor.continue();
-};
+}
 
 function oneResult (records, query, ev) {
   const cursor = ev.target.result;
@@ -50,7 +52,7 @@ function oneResult (records, query, ev) {
     return;
   }
   cursor.continue();
-};
+}
 
 export function deleteDatabase (dbName) {
   return new Promise((resolve, reject) => {
@@ -59,7 +61,7 @@ export function deleteDatabase (dbName) {
     request.onblocked = (/* ev */) => reject(true);
     request.onerror = (/* ev */) => reject();
   });
-};
+}
 
 function openDatabase (dbName, schemaUpdateFn, version) {
   const connection = version ?
@@ -89,15 +91,15 @@ function openDatabase (dbName, schemaUpdateFn, version) {
       updateRequired = false;
     };
   });
-};
+}
 
-function withDatabase(dbName, cb) {
+function withDatabase (dbName, cb) {
   return openDatabase(dbName, db => {
     return Promise.resolve()
       .then(() => cb(db))
       .finally(() => db.close());
   });
-};
+}
 
 function _createObjectStore (db, options) {
   if (!db.objectStoreNames.contains(options.osName)) {
@@ -109,15 +111,15 @@ function _createObjectStore (db, options) {
     options.indexes.forEach((fieldOptions, fieldName) =>
       datastore.createIndex(fieldName, fieldName, fieldOptions));
   }
-};
+}
 
 export function createObjectStore (options) {
   return withDatabase(options.dbName, db => _createObjectStore(db, options));
-};
+}
 
 export function deleteObjectStore (options) {
   return withDatabase(options.dbName, db => db.deleteObjectStore(options.osName));
-};
+}
 
 export function createConfigIfMissing (dbName) {
   const connection = IndexedDB.open(dbName);
@@ -139,7 +141,7 @@ export function createConfigIfMissing (dbName) {
       });
     };
   });
-};
+}
 
 export function get (options = {}) {
   const query = new Query(options.query);
@@ -162,7 +164,7 @@ export function get (options = {}) {
       transaction.onerror = ev => reject(new Errors.TransactionError(ev.target.error));
     });
   });
-};
+}
 
 export function add (options = {}) {
   return withDatabase(options.dbName, db => {
@@ -182,7 +184,7 @@ export function add (options = {}) {
       transaction.onerror = ev => reject(new Errors.TransactionError(ev.target.error));
     });
   });
-};
+}
 
 function _update (newProperties, query, ev) {
   const cursor = ev.target.result;
@@ -196,7 +198,7 @@ function _update (newProperties, query, ev) {
   }
 
   cursor.continue();
-};
+}
 
 export function update (options) {
   const query = new Query(options.query);
@@ -214,7 +216,7 @@ export function update (options) {
       transaction.onerror = ev => reject(new Errors.TransactionError(ev.target.error));
     });
   });
-};
+}
 
 export function replace (options) {
   return withDatabase(options.dbName, db => {
@@ -223,22 +225,22 @@ export function replace (options) {
     const cursor = getCursorForKey(store, options.key);
     let success = false;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       cursor.onsuccess = ev => {
-        const cursor = ev.target.result;
-        if (!cursor) { return; }
+        const _cursor = ev.target.result;
+        if (!_cursor) { return; }
 
         const keypathArray = utils.getKeypathArray(options.keyPath);
         const newObject = Object.assign({}, options.newObject);
         utils.setDeepValue(
           newObject,
           keypathArray,
-          utils.getDeepValue(cursor.value, keypathArray)
+          utils.getDeepValue(_cursor.value, keypathArray)
         );
 
-        cursor.update(newObject);
+        _cursor.update(newObject);
         success = true;
-        cursor.continue();
+        _cursor.continue();
       };
 
       cursor.onerror = ev => reject(new Errors.CursorError(ev.target.error));
@@ -257,4 +259,4 @@ export function del (options) {
     const store = transaction.objectStore(options.osName);
     (options.keys || []).forEach(key => store.delete(key));
   });
-};
+}
