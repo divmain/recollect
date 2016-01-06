@@ -47,56 +47,46 @@ describe("src/recollect", () => {
         sandbox.stub(ixdb, "get").returns(Promise.resolve(result));
       });
 
-      it("calls ixdb.get with dbName option", done => {
-        objectStore.find(query)
+      it("calls ixdb.get with dbName option", () => {
+        return objectStore.find(query)
           .then(() => {
             expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("calls ixdb.get with osName option", done => {
-        objectStore.find(query)
+      it("calls ixdb.get with osName option", () => {
+        return objectStore.find(query)
           .then(() => {
             expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("calls ixdb.get with findMany option === true", done => {
-        objectStore.find(query)
+      it("calls ixdb.get with findMany option === true", () => {
+        return objectStore.find(query)
           .then(() => {
             expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", true);
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("calls ixdb.get with modified query", done => {
+      it("calls ixdb.get with modified query", () => {
         const modifiedQuery = _.chain(query)
           .map((val, key) => [`$data.${key}`, val])
           .object()
           .value();
 
-        objectStore.find(query)
+        return objectStore.find(query)
           .then(() => {
             expect(ixdb.get.getCall(0).args[0].query).to.deep.eql(modifiedQuery);
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("resolves to an array of record data", done => {
-        objectStore.find(query)
+      it("resolves to an array of record data", () => {
+        return objectStore.find(query)
           .then(records => {
             expect(records).to.have.length(2);
             expect(records[0]).to.have.property("prop1", 3);
             expect(records[1]).to.have.property("prop1", 2);
-            done();
-          })
-          .catch(done);
+          });
       });
     });
 
@@ -133,72 +123,60 @@ describe("src/recollect", () => {
         sandbox.stub(ixdb, "get").returns(Promise.resolve(result));
       });
 
-      it("calls ixdb.get with dbName option", done => {
-        objectStore.findOne(query)
+      it("calls ixdb.get with dbName option", () => {
+        return objectStore.findOne(query)
           .then(() => {
             expect(ixdb.get.getCall(0).args[0]).to.have.property("dbName", "testDb");
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("calls ixdb.get with osName option", done => {
-        objectStore.findOne(query)
+      it("calls ixdb.get with osName option", () => {
+        return objectStore.findOne(query)
           .then(() => {
             expect(ixdb.get.getCall(0).args[0]).to.have.property("osName", "testOs");
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("calls ixdb.get with findMany option === false", done => {
-        objectStore.findOne(query)
+      it("calls ixdb.get with findMany option === false", () => {
+        return objectStore.findOne(query)
           .then(() => {
             expect(ixdb.get.getCall(0).args[0]).to.have.property("findMany", false);
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("calls ixdb.get with modified query", done => {
+      it("calls ixdb.get with modified query", () => {
         const modifiedQuery = _.chain(query)
           .map((val, key) => [`$data.${key}`, val])
           .object()
           .value();
 
-        objectStore.findOne(query)
+        return objectStore.findOne(query)
           .then(() => {
             expect(ixdb.get.getCall(0).args[0].query).to.deep.eql(modifiedQuery);
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("resolves to data of first record found", done => {
-        objectStore.findOne(query)
+      it("resolves to data of first record found", () => {
+        return objectStore.findOne(query)
           .then(result => {
             expect(result).to.be.an("object");
             expect(result).to.have.property("prop1", 3);
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("resolves to undefined if no results found", done => {
+      it("resolves to undefined if no results found", () => {
         ixdb.get.restore();
         sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
 
-        objectStore.findOne(query)
+        return objectStore.findOne(query)
           .then(result => {
             expect(result).to.be.undefined;
-            done();
-          })
-          .catch(done);
+          });
       });
     });
 
     describe("findByIndex", () => {
-      it("defers to ixdb.get, providing necessary options", done => {
+      it("defers to ixdb.get, providing necessary options", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs"
@@ -209,7 +187,7 @@ describe("src/recollect", () => {
 
         sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
 
-        objectStore.findByIndex("fieldName", "fieldValue", query)
+        return objectStore.findByIndex("fieldName", "fieldValue", query)
           .then(() => {
             expect(ixdb.get).to.have.been.calledOnce;
             expect(ixdb.get.args[0][0]).to.have.property("dbName", "testDb");
@@ -220,14 +198,12 @@ describe("src/recollect", () => {
               .to.have.property("$lt", 5);
             expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "fieldName");
             expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
-            done();
-          })
-          .catch(done);
+          });
       });
     });
 
     describe("findOneByIndex", () => {
-      it("defers to ixdb.get, providing necessary options", done => {
+      it("defers to ixdb.get, providing necessary options", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs"
@@ -238,7 +214,7 @@ describe("src/recollect", () => {
 
         sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
 
-        objectStore.findOneByIndex("fieldName", "fieldValue", query)
+        return objectStore.findOneByIndex("fieldName", "fieldValue", query)
           .then(() => {
             expect(ixdb.get).to.have.been.calledOnce;
             expect(ixdb.get.args[0][0]).to.have.property("dbName", "testDb");
@@ -249,12 +225,10 @@ describe("src/recollect", () => {
               .to.have.property("$lt", 5);
             expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "fieldName");
             expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("resolves to the first result found", done => {
+      it("resolves to the first result found", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs"
@@ -270,16 +244,13 @@ describe("src/recollect", () => {
 
         sandbox.stub(ixdb, "get").returns(Promise.resolve(ixdbGetResults));
 
-        objectStore.findOneByIndex("fieldName", "fieldValue", query)
+        return objectStore.findOneByIndex("fieldName", "fieldValue", query)
           .then(result => {
             expect(result).to.equal(ixdbGetResults[0].$data);
-            done();
-          })
-          .catch(done);
-
+          });
       });
 
-      it("resolves to undefined if no results found", done => {
+      it("resolves to undefined if no results found", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs"
@@ -290,12 +261,10 @@ describe("src/recollect", () => {
 
         sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
 
-        objectStore.findOneByIndex("fieldName", "fieldValue", query)
+        return objectStore.findOneByIndex("fieldName", "fieldValue", query)
           .then(result => {
             expect(result).to.be.undefined;
-            done();
-          })
-          .catch(done);
+          });
       });
     });
 
@@ -347,7 +316,7 @@ describe("src/recollect", () => {
           .to.throw(Errors.InvalidArgumentError);
       });
 
-      it("defers to ixdb.add, providing necessary options", done => {
+      it("defers to ixdb.add, providing necessary options", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs",
@@ -361,7 +330,7 @@ describe("src/recollect", () => {
         sandbox.stub(ixdb, "add").returns(Promise.resolve([123]));
         sandbox.stub(Date, "now").returns(1451606558471);
 
-        objectStore.insertOne(newRecord)
+        return objectStore.insertOne(newRecord)
           .then(() => {
             expect(ixdb.add.args[0][0]).to.have.property("dbName", "testDb");
             expect(ixdb.add.args[0][0]).to.have.property("osName", "testOs");
@@ -373,13 +342,10 @@ describe("src/recollect", () => {
               .to.have.deep.property("[0].$meta.created", 1451606558471);
             expect(ixdb.add.args[0][0].records)
               .to.have.deep.property("[0].$meta.modified", null);
-
-            done();
-          })
-          .catch(done);
+          });
       });
 
-      it("resolves to the id of the new database entry", done => {
+      it("resolves to the id of the new database entry", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs",
@@ -391,12 +357,11 @@ describe("src/recollect", () => {
         };
 
         sandbox.stub(ixdb, "add").returns(Promise.resolve([123]));
-        objectStore.insertOne(newRecord)
+
+        return objectStore.insertOne(newRecord)
           .then(recordId => {
             expect(recordId).to.equal(123);
-            done();
-          })
-          .catch(done);
+          });
       });
     });
 
