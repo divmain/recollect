@@ -279,12 +279,12 @@ export class ObjectStore {
  * @param   {Object}    recollect  Parent recollect instance.
  * @param   {IDXCursor} dsRecord   Cursor for record in `_config`
  *
- * @returns {Undefined}            No return value.
+ * @returns {ObjectStore}          Newly created object store object.
  */
 function initObjectStoreObject (recollect, dsRecord) {
   const osName = dsRecord.osName;
 
-  if (osName === "_config") { return; }
+  if (osName === "_config") { return null; }
   if (!isUndefined(recollect[osName])) {
     throw new Errors.InitializationError(
       "Invalid object store name or Recollect instance already initialized.");

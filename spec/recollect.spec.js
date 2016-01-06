@@ -635,7 +635,7 @@ describe("src/recollect", () => {
         sandbox.stub(ixdb, "deleteObjectStore").returns(Promise.resolve());
 
         return objectStore.drop()
-          .then(resolved => {
+          .then(() => {
             expect(ixdb.del.args[0][0]).to.have.property("dbName", "testDb");
             expect(ixdb.del.args[0][0]).to.have.property("osName", "_config");
             expect(ixdb.del.args[0][0]).to.have.property("keys");
@@ -659,7 +659,7 @@ describe("src/recollect", () => {
         sandbox.stub(ixdb, "deleteObjectStore").returns(Promise.resolve());
 
         return objectStore.drop()
-          .then(resolved => {
+          .then(() => {
             expect(recollect).to.not.have.property("testOs");
           });
       });
@@ -767,7 +767,7 @@ describe("src/recollect", () => {
         ]));
 
         return r.initialize()
-          .then(instance => {
+          .then(() => {
             expect(r).to.have.property("testOs");
             expect(r.testOs).to.be.instanceof(ObjectStore);
           });
