@@ -194,6 +194,52 @@ describe("query", () => {
   });
 
   describe("getQueryFn", () => {
+    it("returns a query function composed of multiple condition functions", () => {
+      const queryFn = getQueryFn({
+        age: { $gt: 18, $lt: 65 },
+        name: { $contains: "Gates" },
+        "address.city": "Redmond",
+        "address.state": { $eq: "WA" }
+      });
 
+      expect(queryFn({
+        age: 60,
+        name: "Bill Gates",
+        address: {
+          city: "Redmond",
+          state: "WA",
+          country: "USA"
+        }
+      })).to.be.true;
+
+      expect(queryFn({
+        age: 48,
+        name: "Satya Nadella",
+        address: {
+          city: "Redmond",
+          state: "WA",
+          country: "USA"
+        }
+      })).to.be.false;
+
+      expect(queryFn({
+        age: 70,
+        name: "Freddy Gates",
+        address: {
+          city: "Redmond",
+          state: "WA",
+          country: "USA"
+        }
+      })).to.be.false;
+
+      expect(queryFn({
+        age: 51,
+        name: "Melinda Gates",
+        address: {
+          state: "WA",
+          country: "USA"
+        }
+      })).to.be.false;
+    });
   });
 });
