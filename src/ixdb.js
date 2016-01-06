@@ -108,8 +108,10 @@ function _createObjectStore (db, options) {
       autoIncrement: options.autoIncrement
     });
 
-    options.indexes.forEach((fieldOptions, fieldName) =>
-      datastore.createIndex(fieldName, fieldName, fieldOptions));
+    Object.keys(options.indexes || {}).forEach(fieldName => {
+      const fieldOptions = options.indexes[fieldName];
+      datastore.createIndex(fieldName, fieldName, fieldOptions);
+    })
   }
 }
 
