@@ -290,9 +290,9 @@ Given a query, finds all matching objects and overwrites any properties in each 
 The returned promise resolves to `undefined`.
 
 
-#### `.replace(keyPath, newObject)` -> `Promise`
+#### `.replace(key, newObject)` -> `Promise`
 
-Given a unique `keyPath`, replaces the identified object with the provided `newObject`
+Given a unique `key`, replaces the identified object with the provided `newObject`
 
 The returned promise resolves to `undefined`.
 

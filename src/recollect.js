@@ -218,7 +218,7 @@ export class ObjectStore {
   }
 
   /**
-   * Given a key path to an existing object in the object store, replaces
+   * Given a key to an existing object in the object store, replaces
    * that object with the provided newObject.
    *
    * @param  {String} key        Key of object to be overwritten.
