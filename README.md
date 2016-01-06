@@ -71,6 +71,8 @@ oz.initialize()
   .then(() => oz.drop());
 ```
 
+You can try it for yourself, [here](http://jsbin.com/litawu/4/edit?js,console).
+
 
 ------
 
@@ -82,8 +84,6 @@ To run off a CDN, the UMD module is available at the following URL:
 [https://cdn.rawgit.com/divmain/recollect/v1.0.0/dist/recollect.min.js](https://cdn.rawgit.com/divmain/recollect/v1.0.0/dist/recollect.min.js)
 
 Make sure the URL you use points to the version that you want.
-
-To play around with the API a bit, take a look at [this JSbin](http://jsbin.com/litawu/4/edit?js,console).
 
 
 ------
