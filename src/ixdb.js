@@ -2,6 +2,7 @@
 
 import partial from "lodash/function/partial";
 import merge from "lodash/object/merge";
+import assign from "lodash/object/assign";
 
 import Promise from "./promise";
 import * as Errors from "./errors";
@@ -240,7 +241,7 @@ export function replace (options) {
         if (!_cursor) { return; }
 
         const keypathArray = utils.getKeypathArray(options.keyPath);
-        const newObject = Object.assign({}, options.newObject);
+        const newObject = assign({}, options.newObject);
         utils.setDeepValue(
           newObject,
           keypathArray,

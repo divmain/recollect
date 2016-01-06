@@ -1,6 +1,7 @@
 import isObject from "lodash/lang/isObject";
 import isArray from "lodash/lang/isArray";
 import isUndefined from "lodash/lang/isUndefined";
+import assign from "lodash/object/assign";
 
 import * as Errors from "./errors";
 import * as ixdb from "./ixdb";
@@ -65,7 +66,7 @@ function getRecordUpdate (updatedProperties) {
  */
 export class ObjectStore {
   constructor (opts = {}) {
-    Object.assign(this, opts);
+    assign(this, opts);
   }
 
   /**
@@ -290,7 +291,7 @@ function initObjectStoreObject (recollect, dsRecord) {
       "Invalid object store name or Recollect instance already initialized.");
   }
 
-  return recollect[osName] = new ObjectStore(Object.assign({}, dsRecord, {
+  return recollect[osName] = new ObjectStore(assign({}, dsRecord, {
     _db: recollect,
     dbName: recollect.dbName
   }));
@@ -360,7 +361,7 @@ export default class Recollect {
 
     const created = Date.now();
 
-    return ixdb.createObjectStore(Object.assign({}, options, { dbName: this.dbName }))
+    return ixdb.createObjectStore(assign({}, options, { dbName: this.dbName }))
       .then((/* object store */) => ixdb.add({
         dbName: this.dbName,
         osName: "_config",

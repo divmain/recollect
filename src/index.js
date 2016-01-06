@@ -1,3 +1,4 @@
 import * as Recollect from "./recollect";
+import assign from "lodash/object/assign";
 
-module.exports = Object.assign(Recollect.default, Recollect);
+module.exports = assign(Recollect.default, Recollect);
