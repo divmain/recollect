@@ -38,7 +38,7 @@ function getCursorForKey (store, key) {
 function accumulateResults (records, queryFn, ev) {
   const cursor = ev.target.result;
   if (!cursor) { return; }
-  if (!query || queryFn(cursor.value)) {
+  if (!queryFn || queryFn(cursor.value)) {
     records.push(cursor.value);
   }
   cursor.continue();
@@ -47,7 +47,7 @@ function accumulateResults (records, queryFn, ev) {
 function oneResult (records, queryFn, ev) {
   const cursor = ev.target.result;
   if (!cursor) { return; }
-  if (!query || queryFn(cursor.value)) {
+  if (!queryFn || queryFn(cursor.value)) {
     records.push(cursor.value);
     return;
   }
