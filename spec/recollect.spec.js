@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-import { ObjectStore/*, default as Recollect*/ } from "src/recollect";
+import { ObjectStore, default as Recollect } from "src/recollect";
 import * as ixdb from "src/ixdb";
 import * as Errors from "src/errors";
 
@@ -677,20 +677,111 @@ describe("src/recollect", () => {
   });
 
   describe("Recollect", () => {
-    it("throws an error if dbName is not supplied");
+    it("throws an error if dbName is not supplied", () => {
+      expect(() => new Recollect()).to.throw(Errors.InvalidArgumentError);
+    });
 
     describe("createObjectStore", () => {
-      it("creates IndexedDB object store");
+      it("creates IndexedDB object store", () => {
+        const r = new Recollect("testDb");
 
-      it("creates an entry in _config object store");
+        sandbox.stub(ixdb, "createObjectStore").returns(Promise.resolve());
+        sandbox.stub(ixdb, "add").returns(Promise.resolve());
 
-      it("create new instance of ObjectStore");
+        return r.createObjectStore({ osName: "testOs" })
+          .then(() => {
+            expect(ixdb.createObjectStore).to.have.been.calledOnce;
+            expect(ixdb.createObjectStore.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.createObjectStore.args[0][0]).to.have.property("osName", "testOs");
+            expect(ixdb.createObjectStore.args[0][0]).to.have.property("autoIncrement", true);
+            expect(ixdb.createObjectStore.args[0][0]).to.have.property("keyPath", "_id");
+            expect(ixdb.createObjectStore.args[0][0]).to.have.property("indexes");
+          });
+      });
+
+      it("creates an entry in _config object store", () => {
+        const r = new Recollect("testDb");
+
+        sandbox.stub(ixdb, "createObjectStore").returns(Promise.resolve());
+        sandbox.stub(ixdb, "add").returns(Promise.resolve());
+        sandbox.stub(Date, "now").returns(1451606558471);
+
+        return r.createObjectStore({ osName: "testOs" })
+          .then(() => {
+            expect(ixdb.add).to.have.been.calledOnce;
+            expect(ixdb.add.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.add.args[0][0]).to.have.property("osName", "_config");
+            expect(ixdb.add.args[0][0]).to.have.property("records");
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].osName", "testOs");
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].autoIncrement", true);
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].keyPath", "_id");
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].indexes");
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].created", 1451606558471);
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].lastSynced", null);
+          });
+      });
+
+      it("creates new instance of ObjectStore", () => {
+        const r = new Recollect("testDb");
+
+        sandbox.stub(ixdb, "createObjectStore").returns(Promise.resolve());
+        sandbox.stub(ixdb, "add").returns(Promise.resolve());
+        sandbox.stub(Date, "now").returns(1451606558471);
+
+        return r.createObjectStore({ osName: "testOs" })
+          .then(objectStore => {
+            expect(objectStore).to.be.instanceof(ObjectStore);
+          });
+      });
+
+      it("results in new property on parent recollect object", () => {
+        const r = new Recollect("testDb");
+
+        expect(r).to.not.have.property("testOs");
+
+        sandbox.stub(ixdb, "createObjectStore").returns(Promise.resolve());
+        sandbox.stub(ixdb, "add").returns(Promise.resolve());
+        sandbox.stub(Date, "now").returns(1451606558471);
+
+        return r.createObjectStore({ osName: "testOs" })
+          .then(objectStore => {
+            expect(r).to.have.property("testOs", objectStore);
+          });
+      });
     });
 
     describe("initialize", () => {
-      it("creates _config if missing");
+      it("creates _config if missing", () => {
+        const r = new Recollect("testDb");
+        sandbox.stub(ixdb, "createConfigIfMissing").returns(Promise.resolve());
+        sandbox.stub(ixdb, "get").returns(Promise.resolve([]));
 
-      it("instantiates new instances of ObjectStore for each entry in _config");
+        return r.initialize()
+          .then(instance => {
+            expect(instance).to.equal(r);
+            expect(ixdb.createConfigIfMissing.args[0][0]).to.equal("testDb");
+          });
+      });
+
+      it("instantiates new instances of ObjectStore for each entry in _config", () => {
+        const r = new Recollect("testDb");
+        sandbox.stub(ixdb, "createConfigIfMissing").returns(Promise.resolve());
+        sandbox.stub(ixdb, "get").returns(Promise.resolve([
+          { osName: "testOs" }
+        ]));
+
+        return r.initialize()
+          .then(instance => {
+            expect(r).to.have.property("testOs");
+            expect(r.testOs).to.be.instanceof(ObjectStore);
+          });
+      });
     });
   });
 });
