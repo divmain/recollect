@@ -3,7 +3,7 @@ var webpack = require("webpack");
 
 module.exports = {
   cache: true,
-  entry: path.join(__dirname, "src/recollect.js"),
+  entry: path.join(__dirname, "src/index.js"),
   output: {
     path: path.join(__dirname, "dist"),
     library: "Recollect",
