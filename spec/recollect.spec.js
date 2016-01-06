@@ -471,7 +471,7 @@ describe("src/recollect", () => {
     });
 
     describe("update", () => {
-      it("throws an error if `query` option not provided", () => {
+      it("throws an error if query not provided", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs",
@@ -479,9 +479,7 @@ describe("src/recollect", () => {
           keyPath: "_id"
         });
 
-        expect(() => objectStore.update({
-          newProperties: { something: "new" }
-        }))
+        expect(() => objectStore.update(undefined, { something: "new" }))
           .to.throw(Errors.InvalidArgumentError);
       });
 
@@ -493,9 +491,7 @@ describe("src/recollect", () => {
           keyPath: "_id"
         });
 
-        expect(() => objectStore.update({
-          query: { thing: "something" }
-        }))
+        expect(() => objectStore.update({ thing: "something" }))
           .to.throw(Errors.InvalidArgumentError);
       });
 
@@ -510,10 +506,7 @@ describe("src/recollect", () => {
         sandbox.stub(ixdb, "update").returns(Promise.resolve());
         sandbox.stub(Date, "now").returns(1451606558471);
 
-        return objectStore.update({
-          query: { name: "Billy Bob" },
-          newProperties: { isActor: true }
-        })
+        return objectStore.update({ name: "Billy Bob" }, { isActor: true })
           .then(() => {
             expect(ixdb.update.args[0][0]).to.have.property("dbName", "testDb");
             expect(ixdb.update.args[0][0]).to.have.property("osName", "testOs");
@@ -538,10 +531,7 @@ describe("src/recollect", () => {
 
         sandbox.stub(ixdb, "update").returns(Promise.resolve());
 
-        return objectStore.update({
-          query: { name: "Billy Bob" },
-          newProperties: { isActor: true }
-        })
+        return objectStore.update({ name: "Billy Bob" }, { isActor: true })
           .then(resolved => {
             expect(resolved).to.be.undefined;
           });

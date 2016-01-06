@@ -280,9 +280,9 @@ recollect.sportsTeams.insertMany([{
 ```
 
 
-#### `.update(options)` -> `Promise`
+#### `.update(query, newProperties)` -> `Promise`
 
-Given a query, finds all matching objects and overwrites any properties in each of those objects with the provided new properties.  Options:
+Given a query, finds all matching objects and overwrites any properties in each of those objects with the provided new properties.
 
 - `query` - a Recollect [query](#queries).
 - `newProperties` - properties to merge into objects matched by `query`.

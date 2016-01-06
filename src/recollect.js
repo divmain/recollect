@@ -200,22 +200,21 @@ export class ObjectStore {
    * Given query, finds all matching objects in object store and merges new properties into
    * matching objects.
    *
-   * @param  {Object}  options  Object with at least "query" and "newProperties" props.
+   * @param  {Object}  query          Query conforming to Query object literal format.
+   * @param  {Object}  newProperties  Properties to merge into existing records.
    *
-   * @return {Promise}          Resolves with no value on success.
+   * @return {Promise}                Resolves with no value on success.
    */
-  update (options) {
-    options = utils.normalizeOptions(options, ["query", "newProperties"], {
+  update (query, newProperties) {
+    if (!query || !newProperties) {
+      throw new Errors.InvalidArgumentError("update requires query and newProperties arguments.");
+    }
+    return ixdb.update({
       dbName: this.dbName,
-      osName: this.osName
+      osName: this.osName,
+      query: getIxdbQuery(query),
+      newProperties: getRecordUpdate(newProperties)
     });
-
-    options = Object.assign({}, options, {
-      query: getIxdbQuery(options.query),
-      newProperties: getRecordUpdate(options.newProperties)
-    });
-
-    return ixdb.update(options);
   }
 
   /**
