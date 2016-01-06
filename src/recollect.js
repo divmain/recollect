@@ -211,6 +211,7 @@ export class ObjectStore {
     });
 
     options = Object.assign({}, options, {
+      query: getIxdbQuery(options.query),
       newProperties: getRecordUpdate(options.newProperties)
     });
 
