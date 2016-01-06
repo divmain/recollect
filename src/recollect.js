@@ -119,7 +119,7 @@ export class ObjectStore {
       osName: this.osName,
       query: getIxdbQuery(query),
       findMany: true,
-      indexedFieldName,
+      indexedFieldName: `$data.${indexedFieldName}`,
       indexedValue
     }).then(records => records.map(record => record.$data));
   }
@@ -140,7 +140,7 @@ export class ObjectStore {
       osName: this.osName,
       query: getIxdbQuery(query),
       findMany: false,
-      indexedFieldName,
+      indexedFieldName: `$data.${indexedFieldName}`,
       indexedValue
     }).then(records => records.length && records[0].$data || undefined);
   }
@@ -353,6 +353,10 @@ export default class Recollect {
       keyPath: "_id",
       indexes: {}
     });
+    options.indexes = Object.keys(options.indexes).reduce((indexes, fieldName) => {
+      indexes[`$data.${fieldName}`] = options.indexes[fieldName];
+      return indexes;
+    }, {});
 
     const created = Date.now();
 
