@@ -75,9 +75,7 @@ export function constructCondition (queryAspect) {
 }
 
 export default function query (queryLiteral) {
-  if (!queryLiteral) {
-    return () => true;
-  }
+  if (!queryLiteral) { return null; }
 
   const conditions = Object.keys(queryLiteral).map(keypath => {
     const keypathArray = utils.getKeypathArray(keypath);
