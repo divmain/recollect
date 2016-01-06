@@ -201,7 +201,7 @@ function _update (newProperties, queryFn, ev) {
   if (!cursor) { return; }
   const value = cursor.value;
 
-  if (!query || queryFn(value)) {
+  if (!queryFn || queryFn(value)) {
     merge(value, newProperties);
     cursor.update(value);
   }
