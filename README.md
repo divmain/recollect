@@ -1,8 +1,6 @@
 # Recollect
 
-Recollect is an abstraction layer over [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), providing a rich interface to interact with and query client-side databases.
-
-Recollect natively supports [all major browsers](http://caniuse.com/#feat=indexeddb).  Support in some older browsers can be attained through use of a [polyfill](http://nparashuram.com/IndexedDBShim/).  Recollect is asynchronous and non-blocking, and most methods return ES6-compatible promises that resolve to the expected data.
+Recollect is an abstraction layer over [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), providing a rich Promise-based interface to interact with and query client-side databases.  It supports [all major browsers](http://caniuse.com/#feat=indexeddb), and support for some older browsers can be attained through use of a [polyfill](http://nparashuram.com/IndexedDBShim/).
 
 ------
 
