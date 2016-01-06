@@ -94,11 +94,10 @@ function openDatabase (dbName, schemaUpdateFn, version) {
 }
 
 function withDatabase (dbName, cb) {
-  return openDatabase(dbName, db => {
-    return Promise.resolve()
+  return openDatabase(dbName)
+    .then(db => Promise.resolve()
       .then(() => cb(db))
-      .finally(() => db.close());
-  });
+      .finally(() => db.close()));
 }
 
 function _createObjectStore (db, options) {
@@ -111,16 +110,24 @@ function _createObjectStore (db, options) {
     Object.keys(options.indexes || {}).forEach(fieldName => {
       const fieldOptions = options.indexes[fieldName];
       datastore.createIndex(fieldName, fieldName, fieldOptions);
-    })
+    });
   }
 }
 
 export function createObjectStore (options) {
-  return withDatabase(options.dbName, db => _createObjectStore(db, options));
+  let _db;
+  return openDatabase(options.dbName, db => {
+    _db = db;
+    _createObjectStore(db, options);
+  }).finally(() => _db.close());
 }
 
 export function deleteObjectStore (options) {
-  return withDatabase(options.dbName, db => db.deleteObjectStore(options.osName));
+  let _db;
+  return openDatabase(options.dbName, db => {
+    _db = db;
+    db.deleteObjectStore(options.osName);
+  }).finally(() => _db.close());
 }
 
 export function createConfigIfMissing (dbName) {
