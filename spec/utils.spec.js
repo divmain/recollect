@@ -1,6 +1,26 @@
 import * as utils from "src/utils";
 
 describe("utils", () => {
+  describe("getKeypathArray", () => {
+    it("returns original value as single element when no delimiter found", () => {
+      const arr = utils.getKeypathArray("rootLevel");
+      expect(arr).to.be.an.array;
+      expect(arr).to.eql(["rootLevel"]);
+    });
+
+    it("returns array of strings, as deparated by delimiter", () => {
+      const arr = utils.getKeypathArray("goes.very.deep");
+      expect(arr).to.have.length(3);
+      expect(arr).to.eql(["goes", "very", "deep"]);
+    });
+
+    it("doesn't split on escaped delimiters", () => {
+      const arr = utils.getKeypathArray("it.can.skip\\.escaped.delimiters");
+      expect(arr).to.have.length(4);
+      expect(arr).to.eql(["it", "can", "skip.escaped", "delimiters"]);
+    });
+  });
+
   describe("setDeepValue", () => {
     it("replaces an existing value", () => {
       const obj = {
