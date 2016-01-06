@@ -290,7 +290,7 @@ function initObjectStoreObject (recollect, dsRecord) {
       "Invalid object store name or Recollect instance already initialized.");
   }
 
-  recollect[osName] = new ObjectStore(Object.assign({}, dsRecord, {
+  return recollect[osName] = new ObjectStore(Object.assign({}, dsRecord, {
     _db: recollect,
     dbName: recollect.dbName
   }));
