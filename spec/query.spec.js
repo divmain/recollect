@@ -159,7 +159,38 @@ describe("query", () => {
   });
 
   describe("constructCondition", () => {
+    it("returns $regex-equivalent for regex shorthand", () => {
+      expect(constructCondition(/d+/)("dddd")).to.be.true;
+      expect(constructCondition(/[0-9]\.[0-9]+/)("3.1415")).to.be.true;
+      expect(constructCondition(/[0-2]\.[0-9]+/)("3.1415")).to.be.false;
+    });
 
+    it("returns $eq-equivalent for non-objects", () => {
+      expect(constructCondition("dog")("dog")).to.be.true;
+      expect(constructCondition("dog")("cat")).to.be.false;
+    });
+
+    it("returns $eq-equivalent for objects with non-operator keys", () => {
+      expect(constructCondition({ $eq: "something", non: "operator" })({
+        $eq: "something",
+        non: "operator"
+      })).to.be.true;
+      expect(constructCondition({ $eq: "something", non: "operator" })({
+        $eq: "something else",
+        non: "operator"
+      })).to.be.false;
+    });
+
+    it("returns a composite condition-function for objects with operator keys", () => {
+      const conditionFn = constructCondition({
+        $gt: 5,
+        $lt: 20
+      });
+
+      expect(conditionFn(6)).to.be.true;
+      expect(conditionFn(4)).to.be.false;
+      expect(conditionFn("dog")).to.be.false;
+    });
   });
 
   describe("getQueryFn", () => {
