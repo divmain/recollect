@@ -15,7 +15,7 @@ function isEqlRegex (objA, objB) {
     objA.multiline === objB.multiline;
 }
 
-const operators = {
+export const operators = {
   $eq (deepValue, referenceValue) {
     return isEqlRegex(deepValue, referenceValue) || isEqual(deepValue, referenceValue);
   },
@@ -43,13 +43,11 @@ const operators = {
     return regex.test(deepValue);
   },
   $fn (deepValue, testFn) {
-    let isMatch = false;
     try {
-      isMatch = testFn(deepValue);
+      return testFn(deepValue);
     } catch (e) {
-      isMatch = false;
+      return false;
     }
-    return isMatch;
   },
   $fnUnsafe (deepValue, testFn) {
     return testFn(deepValue);
