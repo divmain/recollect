@@ -678,3 +678,5 @@ The following error prototypes are available as properties on `Recollect.Errors`
 | InvalidArgumentError | Thrown if required options not provided or invalid.            |
 | TransactionError     | Thrown upon unexpected condition while performing transaction. |
 | InitializationError  | Thrown if initialization happens improperly or more than once. |
+
+Oftentimes, additional information about the problem will be available on the error object as `err.message`.
