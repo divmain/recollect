@@ -64,7 +64,11 @@ export function constructCondition (queryAspect) {
   if (isRegExp(queryAspect)) {
     return val => operators.$regex(val, queryAspect);
   } else if (isObject(queryAspect) && isComparisonObj(queryAspect)) {
-    const subconditions = Object.keys(queryAspect).map(operator => operators[operator]);
+    const subconditions = Object.keys(queryAspect).map(operatorName => {
+      const referenceValue = queryAspect[operatorName];
+      const operator = operators[operatorName];
+      return val => operator(val, referenceValue);
+    });
     return val => utils.all(subconditions, subcondition => subcondition(val));
   }
   return val => operators.$eq(val, queryAspect);
