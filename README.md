@@ -7,6 +7,7 @@ Recollect is an abstraction layer over [IndexedDB](https://developer.mozilla.org
 ## Table of Contents
 
 - [Example](#example)
+- [Getting Started](#getting-started)
 - [API](#api)
     - [Recollect](#recollect-1)
         - [`new Recollect(dbName)`](#new-recollectdbname)
@@ -75,6 +76,18 @@ landOfOz.characters
 
 landOfOz.drop();
 ```
+
+
+------
+
+## Getting started
+
+If you use NPM for your frontend projects, it can be included in your project by installing (`npm install --save recollect`) and requiring `var Recollect = require("recollect");`.
+
+If you'd like to run off a CDN, the UMD module is available at the following URL:
+[https://cdn.rawgit.com/divmain/recollect/1.0.0/dist/recollect.min.js](https://cdn.rawgit.com/divmain/recollect/1.0.0/dist/recollect.min.js)
+
+Make sure the URL you use points to the version that you want.
 
 
 ------
