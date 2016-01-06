@@ -85,7 +85,7 @@ landOfOz.drop();
 If you use NPM for your frontend projects, it can be included in your project by installing (`npm install --save recollect`) and requiring `var Recollect = require("recollect");`.  If you want to use the ES6 sources directly, do `var Recollect = require("recollect/src");`
 
 To run off a CDN, the UMD module is available at the following URL:
-[https://cdn.rawgit.com/divmain/recollect/1.0.0/dist/recollect.min.js](https://cdn.rawgit.com/divmain/recollect/1.0.0/dist/recollect.min.js)
+[https://cdn.rawgit.com/divmain/recollect/v1.0.0/dist/recollect.min.js](https://cdn.rawgit.com/divmain/recollect/v1.0.0/dist/recollect.min.js)
 
 Make sure the URL you use points to the version that you want.
 
