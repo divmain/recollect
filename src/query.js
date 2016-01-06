@@ -60,14 +60,14 @@ function isComparisonObj (comparisonObj) {
     .reduce((result, opOkay) => result && opOkay, true);
 }
 
-function constructCondition (queryAspect) {
-  if (isObject(queryAspect) && isComparisonObj(queryAspect)) {
+export function constructCondition (queryAspect) {
+  if (isRegExp(queryAspect)) {
+    return val => operators.$regex(val, queryAspect);
+  } else if (isObject(queryAspect) && isComparisonObj(queryAspect)) {
     const subconditions = Object.keys(queryAspect).map(operator => operators[operator]);
     return val => utils.all(subconditions, subcondition => subcondition(val));
-  } else if (isRegExp(queryAspect)) {
-    return operators.$regex;
   }
-  return operators.$eq;
+  return val => operators.$eq(val, queryAspect);
 }
 
 export default function query (queryLiteral) {
