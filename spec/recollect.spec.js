@@ -176,7 +176,7 @@ describe("src/recollect", () => {
     });
 
     describe("findByIndex", () => {
-      it("defers to ixdb.get, providing necessary options", () => {
+      it("defers to ixdb.get, providing expected options", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs"
@@ -203,7 +203,7 @@ describe("src/recollect", () => {
     });
 
     describe("findOneByIndex", () => {
-      it("defers to ixdb.get, providing necessary options", () => {
+      it("defers to ixdb.get, providing expected options", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs"
@@ -316,7 +316,7 @@ describe("src/recollect", () => {
           .to.throw(Errors.InvalidArgumentError);
       });
 
-      it("defers to ixdb.add, providing necessary options", () => {
+      it("defers to ixdb.add, providing expected options", () => {
         const objectStore = new ObjectStore({
           dbName: "testDb",
           osName: "testOs",
