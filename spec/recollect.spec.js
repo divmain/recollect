@@ -402,33 +402,277 @@ describe("src/recollect", () => {
           .to.throw(Errors.InvalidArgumentError);
       });
 
-      it("throws an error if no value presetn at keypath when required");
+      it("throws an error if no value present at keypath when required", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: false,
+          keyPath: "_id"
+        });
 
-      it("defers to ixdb.add, providing necessary options");
+        expect(() => objectStore.insertMany([{
+          ok: "object that has an id",
+          _id: "stuff"
+        }, {
+          bad: "object that needs an id"
+        }]))
+          .to.throw(Errors.InvalidArgumentError);
+      });
 
-      it("resolves to the ids of the new database entries");
+      it("defers to ixdb.add, providing expected options", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+        const newRecord = {
+          some: "data"
+        };
+
+        sandbox.stub(ixdb, "add").returns(Promise.resolve([123]));
+        sandbox.stub(Date, "now").returns(1451606558471);
+
+        return objectStore.insertMany([newRecord])
+          .then(() => {
+            expect(ixdb.add.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.add.args[0][0]).to.have.property("osName", "testOs");
+
+            expect(ixdb.add.args[0][0]).to.have.property("records");
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].$data.some", "data");
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].$meta.created", 1451606558471);
+            expect(ixdb.add.args[0][0].records)
+              .to.have.deep.property("[0].$meta.modified", null);
+          });
+      });
+
+      it("resolves to the ids of the new database entries", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+        const newRecord = {
+          some: "data"
+        };
+
+        sandbox.stub(ixdb, "add").returns(Promise.resolve([123, 123]));
+
+        return objectStore.insertMany([newRecord, newRecord])
+          .then(recordIds => {
+            expect(recordIds).to.have.length(2);
+            expect(recordIds[0]).to.equal(123);
+            expect(recordIds[1]).to.equal(123);
+          });
+      });
     });
 
     describe("update", () => {
-      it("throws an error if `query` option not provided");
+      it("throws an error if `query` option not provided", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
 
-      it("throws an error if `newProperties` option new provided");
+        expect(() => objectStore.update({
+          newProperties: { something: "new" }
+        }))
+          .to.throw(Errors.InvalidArgumentError);
+      });
+
+      it("throws an error if `newProperties` option not provided", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+
+        expect(() => objectStore.update({
+          query: { thing: "something" }
+        }))
+          .to.throw(Errors.InvalidArgumentError);
+      });
+
+      it("defers to ixdb.update, providing expected options", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+
+        sandbox.stub(ixdb, "update").returns(Promise.resolve());
+        sandbox.stub(Date, "now").returns(1451606558471);
+
+        return objectStore.update({
+          query: { name: "Billy Bob" },
+          newProperties: { isActor: true }
+        })
+          .then(() => {
+            expect(ixdb.update.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.update.args[0][0]).to.have.property("osName", "testOs");
+
+            expect(ixdb.update.args[0][0]).to.have.property("newProperties");
+            expect(ixdb.update.args[0][0].newProperties)
+              .to.have.deep.property("$data.isActor", true);
+            expect(ixdb.update.args[0][0].newProperties)
+              .to.not.have.deep.property("$meta.created");
+            expect(ixdb.update.args[0][0].newProperties)
+              .to.have.deep.property("$meta.modified", 1451606558471);
+          });
+      });
+
+      it("resolves after the update succeeds", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+
+        sandbox.stub(ixdb, "update").returns(Promise.resolve());
+
+        return objectStore.update({
+          query: { name: "Billy Bob" },
+          newProperties: { isActor: true }
+        })
+          .then(resolved => {
+            expect(resolved).to.be.undefined;
+          });
+      });
     });
 
     describe("replace", () => {
-      it("defers to ixdb.replace");
+      it("defers to ixdb.replace, providing expected options", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+
+        sandbox.stub(ixdb, "replace").returns(Promise.resolve());
+        sandbox.stub(Date, "now").returns(1451606558471);
+
+        return objectStore.replace("my-unique-key", {
+          my: "new object",
+          and: "its properties"
+        })
+          .then(resolved => {
+            expect(resolved).to.be.undefined;
+
+            expect(ixdb.replace.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.replace.args[0][0]).to.have.property("osName", "testOs");
+            expect(ixdb.replace.args[0][0]).to.have.property("keyPath", "_id");
+            expect(ixdb.replace.args[0][0]).to.have.property("key", "my-unique-key");
+
+            expect(ixdb.replace.args[0][0]).to.have.property("newObject");
+            expect(ixdb.replace.args[0][0].newObject)
+              .to.have.deep.property("$data.my", "new object");
+            expect(ixdb.replace.args[0][0].newObject)
+              .to.have.deep.property("$data.and", "its properties");
+            expect(ixdb.replace.args[0][0].newObject)
+              .to.have.deep.property("$meta.created", 1451606558471);
+            expect(ixdb.replace.args[0][0].newObject)
+              .to.have.deep.property("$meta.modified", null);
+          });
+      });
     });
 
     describe("delete", () => {
-      it("defers to ixdb.del");
+      it("defers to ixdb.del, providing expected options", () => {
+        const objectStore = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id"
+        });
+
+        sandbox.stub(ixdb, "del").returns(Promise.resolve());
+
+        return objectStore.delete("my-unique-key")
+          .then(resolved => {
+            expect(resolved).to.be.undefined;
+
+            expect(ixdb.del.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.del.args[0][0]).to.have.property("osName", "testOs");
+            expect(ixdb.del.args[0][0]).to.have.property("keys");
+            expect(ixdb.del.args[0][0]).to.have.deep.property("keys[0]", "my-unique-key");
+          });
+      });
     });
 
     describe("drop", () => {
-      it("defers to ixdb.deleteObjectStore, providing necessary options");
+      it("defers to ixdb.deleteObjectStore, providing expected options", () => {
+        const recollect = {};
+        const objectStore = recollect.testOs = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id",
+          _db: recollect
+        });
 
-      it("removes the relevant entry from _config object store");
+        sandbox.stub(ixdb, "del").returns(Promise.resolve());
+        sandbox.stub(ixdb, "deleteObjectStore").returns(Promise.resolve());
 
-      it("removes itself as a property from the parent Recollect instance");
+        return objectStore.drop()
+          .then(resolved => {
+            expect(resolved).to.be.undefined;
+
+            expect(ixdb.deleteObjectStore.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.deleteObjectStore.args[0][0]).to.have.property("osName", "testOs");
+          });
+      });
+
+      it("removes the relevant entry from _config object store", () => {
+        const recollect = {};
+        const objectStore = recollect.testOs = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id",
+          _db: recollect
+        });
+
+        sandbox.stub(ixdb, "del").returns(Promise.resolve());
+        sandbox.stub(ixdb, "deleteObjectStore").returns(Promise.resolve());
+
+        return objectStore.drop()
+          .then(resolved => {
+            expect(ixdb.del.args[0][0]).to.have.property("dbName", "testDb");
+            expect(ixdb.del.args[0][0]).to.have.property("osName", "_config");
+            expect(ixdb.del.args[0][0]).to.have.property("keys");
+            expect(ixdb.del.args[0][0]).to.have.deep.property("keys[0]", "testOs");
+          });
+      });
+
+      it("removes itself as a property from the parent Recollect instance", () => {
+        const recollect = {};
+        const objectStore = recollect.testOs = new ObjectStore({
+          dbName: "testDb",
+          osName: "testOs",
+          autoIncrement: true,
+          keyPath: "_id",
+          _db: recollect
+        });
+
+        expect(recollect).to.have.property("testOs", objectStore);
+
+        sandbox.stub(ixdb, "del").returns(Promise.resolve());
+        sandbox.stub(ixdb, "deleteObjectStore").returns(Promise.resolve());
+
+        return objectStore.drop()
+          .then(resolved => {
+            expect(recollect).to.not.have.property("testOs");
+          });
+      });
     });
   });
 
