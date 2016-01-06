@@ -5,7 +5,7 @@ import merge from "lodash/object/merge";
 
 import Promise from "./promise";
 import * as Errors from "./errors";
-import Query from "./query";
+import getQueryFn from "./query";
 import * as utils from "./utils";
 
 
@@ -35,19 +35,19 @@ function getCursorForKey (store, key) {
   return store.openCursor(keyRange);
 }
 
-function accumulateResults (records, query, ev) {
+function accumulateResults (records, queryFn, ev) {
   const cursor = ev.target.result;
   if (!cursor) { return; }
-  if (!query || query.isMatch(cursor.value)) {
+  if (!query || queryFn(cursor.value)) {
     records.push(cursor.value);
   }
   cursor.continue();
 }
 
-function oneResult (records, query, ev) {
+function oneResult (records, queryFn, ev) {
   const cursor = ev.target.result;
   if (!cursor) { return; }
-  if (!query || query.isMatch(cursor.value)) {
+  if (!query || queryFn(cursor.value)) {
     records.push(cursor.value);
     return;
   }
@@ -144,7 +144,7 @@ export function createConfigIfMissing (dbName) {
 }
 
 export function get (options = {}) {
-  const query = new Query(options.query);
+  const queryFn = getQueryFn(options.query);
 
   return withDatabase(options.dbName, db => {
     const records = [];
@@ -155,8 +155,8 @@ export function get (options = {}) {
       getCursor(store);
 
     cursor.onsuccess = options.findMany ?
-      partial(accumulateResults, records, query) :
-      partial(oneResult, records, query);
+      partial(accumulateResults, records, queryFn) :
+      partial(oneResult, records, queryFn);
 
     return new Promise((resolve, reject) => {
       cursor.onerror = ev => reject(new Errors.CursorError(ev.target.error));
@@ -186,13 +186,13 @@ export function add (options = {}) {
   });
 }
 
-function _update (newProperties, query, ev) {
+function _update (newProperties, queryFn, ev) {
   const cursor = ev.target.result;
 
   if (!cursor) { return; }
   const value = cursor.value;
 
-  if (!query || query.isMatch(value)) {
+  if (!query || queryFn(value)) {
     merge(value, newProperties);
     cursor.update(value);
   }
@@ -201,14 +201,14 @@ function _update (newProperties, query, ev) {
 }
 
 export function update (options) {
-  const query = new Query(options.query);
+  const queryFn = getQueryFn(options.query);
 
   return withDatabase(options.dbName, db => {
     const transaction = db.transaction([options.osName], "readwrite");
     const store = transaction.objectStore(options.osName);
     const cursor = getCursor(store);
 
-    cursor.onsuccess = partial(_update, options.newProperties, query);
+    cursor.onsuccess = partial(_update, options.newProperties, queryFn);
 
     return new Promise((resolve, reject) => {
       cursor.onerror = ev => reject(new Errors.CursorError(ev.target.error));

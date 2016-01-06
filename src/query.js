@@ -83,10 +83,5 @@ export default function query (queryLiteral) {
     };
   });
 
-  // TODO: refactor to remove `isMatch` object wrapper - just return `isMatch` itself.
-  return {
-    isMatch (obj) {
-      return utils.all(conditions, condition => condition(obj));
-    }
-  };
+  return obj => utils.all(conditions, condition => condition(obj));
 }
