@@ -9,11 +9,15 @@
     "check-local": "npm run lint && npm run test-local",
     "commit-minified": "git add -f ./dist/recollect.min.js && git commit -m 'add minified source'",
     "lint": "eslint ./src ./spec",
-    "preversion": "npm run lint && npm run test-local",
+    "preversion": "npm run lint && npm run test-local && npm run build && npm run commit-minified",
     "prepublish": "npm run lint && npm run test-local",
     "test-chrome": "karma start ./karma.config.js --browsers Chrome",
     "test-local": "karma start ./karma.config.js --browsers Chrome,Firefox,Safari"
   },
+  "files": [
+    "src",
+    "dist/recollect.min.js"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/divmain/recollect.git"
