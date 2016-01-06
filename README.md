@@ -45,36 +45,30 @@ Recollect is an abstraction layer over [IndexedDB](https://developer.mozilla.org
 Here's a quick look at what you can do.
 
 ```javascript
-var r = new Recollect("landOfOz");
-r.initialize();
-r.createObjectStore({ osName: "characters" });
-
-// ..
-
-r.characters.insertOne({ name: "Dorothy", ownsPets: true, age: 17 })
-  .then(function (id) {
-    console.log("Dorothy's ID is" + id);
-  });
-
-// ...
-
-var landOfOz = new Recollect("landOfOz");
-landOfOz.initialize();
-
-landOfOz.characters.findOne({ ownsPets: true, age: { $gt: 15, $lt: 20 } })
-  .then(function (result) {
-    console.log("ID: " + result._id);
-    console.log("Object:", result);
-  });
-
-// ...
-
-landOfOz.characters.drop();
-
-landOfOz.characters
-// undefined
-
-landOfOz.drop();
+var oz = new Recollect("landOfOz");
+oz.initialize()
+  .then(() => oz.createObjectStore({ osName: "characters" }))
+  .then(() => oz.characters.insertMany([{
+    name: "Scarecrow",
+    hasPets: false,
+    age: 24
+  }, {
+    name: "Dorothy",
+    hasPets: true,
+    age: 17
+  }, {
+    name: "Witch of the West",
+    hasPets: true,
+    age: 849
+  }]))
+  .then(ids => console.log(`Created new character entries with unique IDs: ${ids}.`))
+  .then(() => oz.characters.findOne({
+    hasPets: true,
+    age: { $gt: 15, $lt: 30 }
+  }))
+  .then(character => console.log(`${character.name} matches your search.`))
+  .then(() => oz.characters.drop())
+  .then(() => oz.drop());
 ```
 
 
