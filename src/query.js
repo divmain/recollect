@@ -76,11 +76,7 @@ export default function query (queryLiteral) {
   const conditions = Object.keys(queryLiteral).map(keypath => {
     const keypathArray = utils.getKeypathArray(keypath);
     const condition = constructCondition(queryLiteral[keypath]);
-
-    return obj => {
-      const deepValue = utils.getDeepValue(obj, keypathArray);
-      return condition(deepValue);
-    };
+    return obj => condition(utils.getDeepValue(obj, keypathArray));
   });
 
   return obj => utils.all(conditions, condition => condition(obj));
