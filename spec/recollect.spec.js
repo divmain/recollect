@@ -196,7 +196,7 @@ describe("src/recollect", () => {
             expect(ixdb.get.args[0][0]).to.have.property("query").and
               .to.have.property("$data.prop1").and
               .to.have.property("$lt", 5);
-            expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "fieldName");
+            expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "$data.fieldName");
             expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
           });
       });
@@ -223,7 +223,7 @@ describe("src/recollect", () => {
             expect(ixdb.get.args[0][0]).to.have.property("query").and
               .to.have.property("$data.prop1").and
               .to.have.property("$lt", 5);
-            expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "fieldName");
+            expect(ixdb.get.args[0][0]).to.have.property("indexedFieldName", "$data.fieldName");
             expect(ixdb.get.args[0][0]).to.have.property("indexedValue", "fieldValue");
           });
       });
