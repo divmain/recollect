@@ -89,6 +89,8 @@ To run off a CDN, the UMD module is available at the following URL:
 
 Make sure the URL you use points to the version that you want.
 
+To play around with the API a bit, take a look at [this JSbin](http://jsbin.com/litawu/4/edit?js,console).
+
 
 ------
 
